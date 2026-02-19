@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -9,36 +11,97 @@ public class TutorialScript : MonoBehaviour
     [SerializeField] GameObject startingText;
 
     [SerializeField] private GameObject cameraHandler;
+    [SerializeField] private ObjectCollision objectCollision;
+    
+    private TextMeshProUGUI _startingTextTMP;
     
     private bool _startedTutorial;
-    private bool _isInTutorialBeginning;
+    private bool _isTypingFinished = false;
+    private bool _startedCoroutines;
     
     private Vector3 targetPosition;
     private Vector3 startingPosition;
 
     void Start()
     {
+        _startingTextTMP = startingText.GetComponentInChildren<TextMeshProUGUI>();
+        if (cameraHandler == null)
+            cameraHandler = FindFirstObjectByType<CameraHandler>().gameObject;
+
         if (startingText != null)
         {
             startingPosition = startingText.transform.position;
-            targetPosition = startingText.transform.position + Vector3.down * 175;
         }
         if (player != null)
         {
+            cameraHandler.GetComponent<CameraHandler>().OverrideShouldMove = true;
             _startedTutorial = true;
-            _isInTutorialBeginning = true;
         }
     }
 
+    private bool hasActivatedTextDropdown = false;
+
     void Update()
     {
-        if (_startedTutorial)
+        if (!_startedTutorial)
+            return;
+
+        if (!_startedCoroutines)
         {
-            
-            startingText.transform.position = Vector3.Lerp(startingText.transform.position, targetPosition, Time.deltaTime * 4f);
+            StartCoroutine(RunOpeningTutorial());
+            _startedCoroutines = true;
         }
+
+        if (objectCollision!= null && objectCollision.hasTouchedPlayer && !hasActivatedTextDropdown)
+        {
+            hasActivatedTextDropdown = true;
+            objectCollision.hasTouchedPlayer = false;
+            StartCoroutine(TutorialTextDropDown(objectCollision.text));
+        }
+
+        startingText.transform.position = Vector3.Lerp(startingText.transform.position, targetPosition, Time.deltaTime * 4f);
     }
     
+    IEnumerator RunOpeningTutorial()
+    {
+        yield return StartCoroutine(TutorialTextDropDown("Welcome to the Tutorial!"));
+        yield return StartCoroutine(TutorialTextDropDown("To kick this off, I suggest we go right! right and left are 'A' / 'D'"));
+    }
+
+    IEnumerator TutorialTextDropDown(string text)
+    {
+        targetPosition = startingPosition + Vector3.down * 175;
+        player.GetComponent<PlayerMovement>().ShouldMove = false;
+
+        yield return new WaitUntil(() => Vector3.Distance(startingText.transform.position, targetPosition) < 1f);
+        _isTypingFinished = false;
+        StartCoroutine(TypeText(text, 0.03f));
+
+        yield return new WaitUntil(() => _isTypingFinished);
+        yield return new WaitForSeconds(0.5f);
+
+        targetPosition = startingPosition + Vector3.up * 175;
+        if (player != null)
+        {
+            cameraHandler.GetComponent<CameraHandler>().OverrideShouldMove = true;
+            player.GetComponent<PlayerMovement>().ShouldMove = true;
+        }
+        hasActivatedTextDropdown = false;
+        yield return new WaitUntil(() => Vector3.Distance(startingText.transform.position, targetPosition) < 1f);
+        _startingTextTMP.text = "";
+
+    }
     
+    IEnumerator TypeText(string message, float speed = 0.05f)
+    {
+        _isTypingFinished = false;
+        _startingTextTMP.text = "";
+        foreach (char letter in message)
+        {
+            _startingTextTMP.text += letter;
+            yield return new WaitForSeconds(speed);
+        }
+        _isTypingFinished = true;
+    }
     
 }

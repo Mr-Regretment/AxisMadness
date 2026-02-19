@@ -94,7 +94,7 @@ public class CameraHandler : MonoBehaviour
             if (cameraDiff < 1f && playerDiff < 1f)
             {
                 isRotating = false;
-                hasToggledShouldMove = false;
+                ResetToggle();
             }
         }
 
@@ -105,26 +105,37 @@ public class CameraHandler : MonoBehaviour
     }
 
     private bool hasToggledShouldMove = false;
-    void ToggleShouldMove()
+    void ToggleShouldMove(bool shouldMoveSet)
     {
         if (!hasToggledShouldMove)
         {
-            player.GetComponent<PlayerMovement>().ShouldMove = !player.GetComponent<PlayerMovement>().ShouldMove;
+            player.GetComponent<PlayerMovement>().ShouldMove = shouldMoveSet;
             hasToggledShouldMove = true;
         }
     }
-    
+
+    void ResetToggle()
+    {
+        hasToggledShouldMove = false;
+    }
+
+    public bool OverrideShouldMove { get; set; } = false;
+
     void CameraReposition()
     {
         transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime * 2f);
+    
+        if (OverrideShouldMove)
+            return;
+    
         if (Vector3.Distance(transform.position, targetPosition) > 5f)
         {
-            hasToggledShouldMove = false;
+            ResetToggle();
             player.GetComponent<PlayerMovement>().ShouldMove = false;
         }
         else
         {
-            ToggleShouldMove();
+            ToggleShouldMove(true);
         }
     }
     
