@@ -96,6 +96,7 @@ public class CameraHandler : MonoBehaviour
             {
                 isRotating = false;
                 ResetToggle();
+                player.GetComponent<PlayerMovement>().ShouldMove = true;
             }
         }
 

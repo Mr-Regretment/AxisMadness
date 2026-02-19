@@ -19,6 +19,7 @@ public class TutorialScript : MonoBehaviour
     private bool _startedTutorial;
     private bool _isTypingFinished = false;
     private bool _startedCoroutines;
+    private bool _skipLine = false;
     
     private Vector3 targetPosition;
     private Vector3 startingPosition;
@@ -72,12 +73,16 @@ public class TutorialScript : MonoBehaviour
             {
                 "Oh, this is a Rotate Pad and Axis Token!",
                 "If you've got at least one Axis Token, you can use it to rotate the world around you!",
-                "Theres just one thing, you HAVE to stand on the Rotate Pad.",
+                "There's just one thing, you HAVE to stand on the Rotate Pad.",
                 "Controls for Axis Break: ",
                 "Axis Break(Hold Shift) and press Q to rotate it right or E to rotate it left.",
                 "Go ahead, try it!"
             },0.045f
                 ));
+        }
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            _skipLine = true;
         }
         startingText.transform.position = Vector3.Lerp(startingText.transform.position, targetPosition, Time.deltaTime * 4f);
     }
@@ -99,7 +104,14 @@ public class TutorialScript : MonoBehaviour
             _isTypingFinished = false;
             StartCoroutine(TypeText(text, speed));
             yield return new WaitUntil(() => _isTypingFinished);
-            yield return new WaitForSecondsRealtime(2.5f);
+    
+            float timer = 0f;
+            while (timer < 2.5f && !_skipLine)
+            {
+                timer += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            _skipLine = false;
         }
 
         targetPosition = startingPosition + Vector3.up * 175;
@@ -116,12 +128,22 @@ public class TutorialScript : MonoBehaviour
     IEnumerator TypeText(string message, float speed = 0.05f)
     {
         _isTypingFinished = false;
+        _skipLine = false;
         _startingTextTMP.text = "";
+
         foreach (char letter in message)
         {
+            if (_skipLine)
+            {
+                _startingTextTMP.text = message;
+                break;
+            }
+
             _startingTextTMP.text += letter;
-            yield return new WaitForSeconds(speed);
+            yield return new WaitForSecondsRealtime(speed);
         }
+
+        _skipLine = false;
         _isTypingFinished = true;
     }
     

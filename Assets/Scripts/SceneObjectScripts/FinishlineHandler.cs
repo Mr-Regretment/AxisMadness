@@ -52,19 +52,23 @@ public class FinishlineHandler : MonoBehaviour
         }
     
         hasTransitioned = true;
-        playerMovement.ShouldMove = false;
-    
+
+        if (playerMovement != null)
+            playerMovement.ShouldMove = false;
+
+        if (UIHandler.Instance == null)
+            return;
+
         Vector3 targetPos = new Vector3(
-            player.transform.position.x, 
+            player.transform.position.x,
             _camera.transform.position.y - 70,
             player.transform.position.z
         );
 
-    
         UIHandler.Instance.CameraTransitionToScene(
             _camera,
             targetPos,
             Quaternion.Euler(_camera.transform.eulerAngles.x, _camera.transform.eulerAngles.y, _camera.transform.eulerAngles.z),
-            NextLevelIndex,4f);
+            NextLevelIndex, 4f);
     }
 }

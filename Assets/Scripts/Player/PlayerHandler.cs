@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerHandler : Entity
@@ -53,6 +54,10 @@ public class PlayerHandler : Entity
 
     private void Update()
     {
+        if (transform.position.y < -3)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (GameIsPaused)
