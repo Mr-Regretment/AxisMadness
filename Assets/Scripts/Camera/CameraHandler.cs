@@ -119,13 +119,25 @@ public class CameraHandler : MonoBehaviour
     public IEnumerator CameraMove(Vector3 newPosition, float duration, float delay)
     {
         yield return new WaitForSeconds(delay);
+
         automaticCameraReposition = false;
+        OverrideShouldMove = true;
+        player.GetComponent<PlayerMovement>().ShouldMove = false;
+
         Vector3 startPosition = transform.position;
         targetPosition = newPosition;
+
         yield return new WaitUntil(() => Vector3.Distance(transform.position, targetPosition) < 2f);
+
         yield return new WaitForSeconds(duration);
+
         targetPosition = startPosition;
+
+        yield return new WaitUntil(() => Vector3.Distance(transform.position, targetPosition) < 2f);
+
         automaticCameraReposition = true;
+        OverrideShouldMove = false;
+        player.GetComponent<PlayerMovement>().ShouldMove = true;
     }
     void ResetToggle()
     {

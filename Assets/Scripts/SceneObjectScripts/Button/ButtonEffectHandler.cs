@@ -80,7 +80,7 @@ public class ButtonEffectHandler : MonoBehaviour
     {
         if (!hasPressed)
         {
-            StartCoroutine(effect.tutorialScript.TutorialTextDropDown(inputText));
+            StartCoroutine(effect.tutorialScript.TutorialTextDropDown(inputText, 0.03f));
             hasPressed = true;
         }
     }

@@ -1921,9 +1921,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObjectCollision
   hasTouchedPlayer: 0
   text:
-  - A crossroads?!
+  - A crossroad?!
   - 'That makes no sense! '
-  - The controls are only Left And Right!
+  - The only controls are Left And Right!
+  - Not Left, Right, Up, Down!
 --- !u!65 &1652979006
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2278,7 +2279,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2627253014130923754, guid: a91afb9795daf5b45991ba9bb568f7c7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 24.5
+      value: 21
       objectReference: {fileID: 0}
     - target: {fileID: 2627253014130923754, guid: a91afb9795daf5b45991ba9bb568f7c7, type: 3}
       propertyPath: m_LocalPosition.y

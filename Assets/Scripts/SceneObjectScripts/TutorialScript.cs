@@ -42,7 +42,7 @@ public class TutorialScript : MonoBehaviour
     }
 
     private bool hasActivatedTextDropdown = false;
-
+    private bool _hasShownRotatePadText = false;
     void Update()
     {
         if (!_startedTutorial)
@@ -53,7 +53,7 @@ public class TutorialScript : MonoBehaviour
             StartCoroutine(TutorialTextDropDown(new string[]
             {
                 "Welcome to the Tutorial!"
-            }));
+            }, 0.03f));
             _startedCoroutines = true;
         }
 
@@ -61,17 +61,29 @@ public class TutorialScript : MonoBehaviour
         {
             hasActivatedTextDropdown = true;
             objectCollision.hasTouchedPlayer = false;
-            StartCoroutine(TutorialTextDropDown(objectCollision.text));
+            StartCoroutine(TutorialTextDropDown(objectCollision.text, 0.03f));
+        }
+
+        if (playerCamera.StandingOverRotatePad() && !_hasShownRotatePadText)
+        {
+            _hasShownRotatePadText = true;
+            StartCoroutine(TutorialTextDropDown(new string[]
+            {
+                "Oh, this is a Rotate Pad! And beside it, an Axis Token (The rotating thing)",
+                "If you've got at least one Axis Token, you can stand on this to rotate the world around you!",
+                "You've gotta press hold down shift to do it though."
+            },0.03f
+                ));
         }
         startingText.transform.position = Vector3.Lerp(startingText.transform.position, targetPosition, Time.deltaTime * 4f);
     }
 
-    IEnumerator TutorialTextDropDown(string text)
+    IEnumerator TutorialTextDropDown(string text, float speed)
     {
-        yield return StartCoroutine(TutorialTextDropDown(new string[] { text }));
+        yield return StartCoroutine(TutorialTextDropDown(new string[] { text }, speed));
     }
 
-    public IEnumerator TutorialTextDropDown(string[] texts)
+    public IEnumerator TutorialTextDropDown(string[] texts, float speed)
     {
         targetPosition = startingPosition + Vector3.down * 275;
         player.GetComponent<PlayerMovement>().ShouldMove = false;
@@ -81,7 +93,7 @@ public class TutorialScript : MonoBehaviour
         foreach (string text in texts)
         {
             _isTypingFinished = false;
-            StartCoroutine(TypeText(text, 0.03f));
+            StartCoroutine(TypeText(text, speed));
             yield return new WaitUntil(() => _isTypingFinished);
             yield return new WaitForSeconds(0.5f);
         }
@@ -89,7 +101,7 @@ public class TutorialScript : MonoBehaviour
         targetPosition = startingPosition + Vector3.up * 175;
         if (player != null)
         {
-            cameraHandler.GetComponent<CameraHandler>().OverrideShouldMove = true;
+            cameraHandler.GetComponent<CameraHandler>().OverrideShouldMove = false;
             player.GetComponent<PlayerMovement>().ShouldMove = true;
         }
         hasActivatedTextDropdown = false;
