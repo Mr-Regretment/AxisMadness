@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class CameraHandler : MonoBehaviour
@@ -10,6 +11,7 @@ public class CameraHandler : MonoBehaviour
     [SerializeField] private bool isRotating = false;
     private Vector3 _targetRoundedPos;
     private bool initialMoveDone = false;
+    private bool automaticCameraReposition = true;
     
     private const float CAMERA_Y_OFFSET = 7.5f;
     
@@ -79,7 +81,7 @@ public class CameraHandler : MonoBehaviour
         if (!initialMoveDone && Vector3.Distance(transform.position, targetPosition) < 0.5f)
             initialMoveDone = true;
 
-        if (Input.GetKeyDown(KeyCode.R) || player.GetComponent<CharacterOffScreen>().isOffscreen)
+        if (Input.GetKeyDown(KeyCode.R) || (player.GetComponent<CharacterOffScreen>().isOffscreen && automaticCameraReposition))
         {
             targetPosition = new Vector3(player.transform.position.x, targetPosition.y, player.transform.position.z);
         }
@@ -114,6 +116,17 @@ public class CameraHandler : MonoBehaviour
         }
     }
 
+    public IEnumerator CameraMove(Vector3 newPosition, float duration, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        automaticCameraReposition = false;
+        Vector3 startPosition = transform.position;
+        targetPosition = newPosition;
+        yield return new WaitUntil(() => Vector3.Distance(transform.position, targetPosition) < 2f);
+        yield return new WaitForSeconds(duration);
+        targetPosition = startPosition;
+        automaticCameraReposition = true;
+    }
     void ResetToggle()
     {
         hasToggledShouldMove = false;

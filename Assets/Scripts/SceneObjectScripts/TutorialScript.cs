@@ -73,7 +73,7 @@ public class TutorialScript : MonoBehaviour
 
     public IEnumerator TutorialTextDropDown(string[] texts)
     {
-        targetPosition = startingPosition + Vector3.down * 175;
+        targetPosition = startingPosition + Vector3.down * 275;
         player.GetComponent<PlayerMovement>().ShouldMove = false;
 
         yield return new WaitUntil(() => Vector3.Distance(startingText.transform.position, targetPosition) < 1f);

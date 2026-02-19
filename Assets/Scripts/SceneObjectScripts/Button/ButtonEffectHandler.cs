@@ -17,6 +17,11 @@ public class ButtonEffectHandler : MonoBehaviour
         [Header("Text Dropdown")] 
         public String[] text;
         public TutorialScript tutorialScript;
+        
+        [Header("CameraReposition For a Duration")]
+        public Vector3 cameraTargetPosition;
+        public float duration;
+        
         [Header("Settings")]
         public float moveDistance = 20f;
         public bool moveUpward = true;
@@ -28,6 +33,7 @@ public class ButtonEffectHandler : MonoBehaviour
     }
     
     [SerializeField] private List<ButtonEffect> effects = new List<ButtonEffect>();
+    [SerializeField] private CameraHandler cameraHandler;
 
     private void Start()
     {
@@ -57,7 +63,16 @@ public class ButtonEffectHandler : MonoBehaviour
             {
                 TutorialText(effect, effect.text);
             }
+
+            if (effect.cameraTargetPosition != Vector3.zero && !effect.wasPressed && isPressed)
+            {
+                effect.wasPressed = true;
+                StartCoroutine(cameraHandler.CameraMove(effect.cameraTargetPosition, effect.duration,1));
+            }
+            
         }
+        
+        
     }
     private bool hasPressed = false;
 
