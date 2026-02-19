@@ -12,7 +12,8 @@ public class TutorialScript : MonoBehaviour
 
     [SerializeField] private GameObject cameraHandler;
     [SerializeField] private ObjectCollision objectCollision;
-    
+
+    [SerializeField] private PlayerCamera playerCamera;
     private TextMeshProUGUI _startingTextTMP;
     
     private bool _startedTutorial;
@@ -34,6 +35,7 @@ public class TutorialScript : MonoBehaviour
         }
         if (player != null)
         {
+            playerCamera = player.GetComponent<PlayerCamera>();
             cameraHandler.GetComponent<CameraHandler>().OverrideShouldMove = true;
             _startedTutorial = true;
         }
@@ -50,18 +52,17 @@ public class TutorialScript : MonoBehaviour
         {
             StartCoroutine(TutorialTextDropDown(new string[]
             {
-                "Welcome to the Tutorial!",
-                "Right and left are 'A' / 'D, Jump is space"
+                "Welcome to the Tutorial!"
             }));
             _startedCoroutines = true;
         }
-        if (objectCollision!= null && objectCollision.hasTouchedPlayer && !hasActivatedTextDropdown)
+
+        if (objectCollision != null && objectCollision.hasTouchedPlayer && !hasActivatedTextDropdown)
         {
             hasActivatedTextDropdown = true;
             objectCollision.hasTouchedPlayer = false;
             StartCoroutine(TutorialTextDropDown(objectCollision.text));
         }
-
         startingText.transform.position = Vector3.Lerp(startingText.transform.position, targetPosition, Time.deltaTime * 4f);
     }
 
@@ -70,7 +71,7 @@ public class TutorialScript : MonoBehaviour
         yield return StartCoroutine(TutorialTextDropDown(new string[] { text }));
     }
 
-    IEnumerator TutorialTextDropDown(string[] texts)
+    public IEnumerator TutorialTextDropDown(string[] texts)
     {
         targetPosition = startingPosition + Vector3.down * 175;
         player.GetComponent<PlayerMovement>().ShouldMove = false;

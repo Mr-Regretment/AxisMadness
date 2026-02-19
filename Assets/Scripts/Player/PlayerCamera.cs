@@ -1,13 +1,32 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerCamera : PlayerHandler
 {
     [SerializeField] private CameraHandler cameraHandler;
     private Renderer _renderer;
     private PlayerMovement _playerMovement;
-    [SerializeField] private ModelCyclingAnimation _modelCycling;
-    private void Start()
+    
+    [SerializeField] protected GameObject leftRotateArrow;
+    [SerializeField] protected GameObject rightRotateArrow;
+    private Image leftImage;
+    private Image rightImage;
+    private TextMeshProUGUI leftText;
+    private TextMeshProUGUI rightText;
+    void Start()
     {
+        leftImage = leftRotateArrow.GetComponent<Image>();
+        rightImage = rightRotateArrow.GetComponent<Image>();
+        
+        leftText = leftRotateArrow.GetComponentInChildren<TextMeshProUGUI>();
+        rightText = rightRotateArrow.GetComponentInChildren<TextMeshProUGUI>();
+    
+        Color leftImageColour = leftImage.color;
+        Color rightImageColor = rightImage.color;
+        leftImageColour.a = 0;
+        rightImageColor.a = 0;
+        
         _renderer = GetComponent<Renderer>();
         
         _playerMovement = GetComponent<PlayerMovement>();
@@ -15,14 +34,26 @@ public class PlayerCamera : PlayerHandler
         if (cameraHandler == null)
             cameraHandler = FindFirstObjectByType<CameraHandler>();
     }
-    
+
+    private float targetAlpha = 0f;
     private void Update()
     {
-        if (cameraHandler == null)
-            return;
+        Color leftImageColour = leftImage.color;
+        Color rightImageColor = rightImage.color;
+        Color leftTextColour = leftText.color;
+        Color rightTextColour = rightText.color;
         
-
-        float distanceToPlayer = Vector3.Distance(cameraHandler.transform.position, transform.position);
+        targetAlpha = Input.GetKey(KeyCode.LeftShift) && StandingOverRotatePad()? 1 : 0;
+            
+        leftImageColour.a = Mathf.Lerp(leftImageColour.a, targetAlpha, Time.deltaTime * 10f);
+        rightImageColor.a = Mathf.Lerp(rightTextColour.a, targetAlpha, Time.deltaTime * 10f);
+        leftTextColour.a = Mathf.Lerp(leftImageColour.a, targetAlpha, Time.deltaTime * 10f);
+        rightTextColour.a = Mathf.Lerp(rightTextColour.a, targetAlpha, Time.deltaTime * 10f);
+        
+        leftImage.color = leftImageColour;   
+        rightImage.color = rightImageColor;
+        leftText.color = leftTextColour;
+        rightText.color = rightTextColour;
     }
 
     public bool StandingOverRotatePad()

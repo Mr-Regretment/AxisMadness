@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +13,10 @@ public class ButtonEffectHandler : MonoBehaviour
         [Header("Objects")]
         public GameObject objectToMove;
         public GameObject objectToToggle;
-        
+
+        [Header("Text Dropdown")] 
+        public String[] text;
+        public TutorialScript tutorialScript;
         [Header("Settings")]
         public float moveDistance = 20f;
         public bool moveUpward = true;
@@ -20,6 +24,7 @@ public class ButtonEffectHandler : MonoBehaviour
         
         [HideInInspector] public Vector3 restPosition;
         [HideInInspector] public bool wasPressed;
+        
     }
     
     [SerializeField] private List<ButtonEffect> effects = new List<ButtonEffect>();
@@ -41,12 +46,27 @@ public class ButtonEffectHandler : MonoBehaviour
                 continue;
 
             bool isPressed = effect.button.IsButtonPressed();
-            
-            if(effect.objectToToggle != null)
+
+            if (effect.objectToToggle != null)
                 HandleToggle(effect, isPressed);
-            
-            if( effect.objectToMove != null)
+
+            if (effect.objectToMove != null)
                 MoveObject(effect, isPressed);
+
+            if (effect.tutorialScript != null && isPressed)
+            {
+                TutorialText(effect, effect.text);
+            }
+        }
+    }
+    private bool hasPressed = false;
+
+    private void TutorialText(ButtonEffect effect, String[] inputText)
+    {
+        if (!hasPressed)
+        {
+            StartCoroutine(effect.tutorialScript.TutorialTextDropDown(inputText));
+            hasPressed = true;
         }
     }
 
