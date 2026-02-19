@@ -48,10 +48,13 @@ public class TutorialScript : MonoBehaviour
 
         if (!_startedCoroutines)
         {
-            StartCoroutine(RunOpeningTutorial());
+            StartCoroutine(TutorialTextDropDown(new string[]
+            {
+                "Welcome to the Tutorial!",
+                "To kick this off, I suggest we go right! right and left are 'A' / 'D"
+            }));
             _startedCoroutines = true;
         }
-
         if (objectCollision!= null && objectCollision.hasTouchedPlayer && !hasActivatedTextDropdown)
         {
             hasActivatedTextDropdown = true;
@@ -61,24 +64,26 @@ public class TutorialScript : MonoBehaviour
 
         startingText.transform.position = Vector3.Lerp(startingText.transform.position, targetPosition, Time.deltaTime * 4f);
     }
-    
-    IEnumerator RunOpeningTutorial()
-    {
-        yield return StartCoroutine(TutorialTextDropDown("Welcome to the Tutorial!"));
-        yield return StartCoroutine(TutorialTextDropDown("To kick this off, I suggest we go right! right and left are 'A' / 'D'"));
-    }
 
     IEnumerator TutorialTextDropDown(string text)
+    {
+        yield return StartCoroutine(TutorialTextDropDown(new string[] { text }));
+    }
+
+    IEnumerator TutorialTextDropDown(string[] texts)
     {
         targetPosition = startingPosition + Vector3.down * 175;
         player.GetComponent<PlayerMovement>().ShouldMove = false;
 
         yield return new WaitUntil(() => Vector3.Distance(startingText.transform.position, targetPosition) < 1f);
-        _isTypingFinished = false;
-        StartCoroutine(TypeText(text, 0.03f));
 
-        yield return new WaitUntil(() => _isTypingFinished);
-        yield return new WaitForSeconds(0.5f);
+        foreach (string text in texts)
+        {
+            _isTypingFinished = false;
+            StartCoroutine(TypeText(text, 0.03f));
+            yield return new WaitUntil(() => _isTypingFinished);
+            yield return new WaitForSeconds(0.5f);
+        }
 
         targetPosition = startingPosition + Vector3.up * 175;
         if (player != null)
@@ -89,7 +94,6 @@ public class TutorialScript : MonoBehaviour
         hasActivatedTextDropdown = false;
         yield return new WaitUntil(() => Vector3.Distance(startingText.transform.position, targetPosition) < 1f);
         _startingTextTMP.text = "";
-
     }
     
     IEnumerator TypeText(string message, float speed = 0.05f)
