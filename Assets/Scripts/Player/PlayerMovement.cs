@@ -21,10 +21,16 @@ public class PlayerMovement : PlayerHandler
     {
         moveSpeed = 10;
         float vertical = Input.GetAxis("Horizontal");
-    
+
         float speed = ShouldMove ? vertical * moveSpeed : 0f;
         Vector3 movement = transform.forward * speed;
-        rigidbody.linearVelocity = new Vector3(movement.x, rigidbody.linearVelocity.y, movement.z);
+
+        Vector3 currentVelocity = rigidbody.linearVelocity;
+        Vector3 targetVelocity = new Vector3(movement.x, currentVelocity.y, movement.z);
+        Vector3 velocityDiff = targetVelocity - currentVelocity;
+        velocityDiff.y = 0f;
+
+        rigidbody.AddForce(velocityDiff, ForceMode.VelocityChange);
     }
     
     private void HandleChildRotation()

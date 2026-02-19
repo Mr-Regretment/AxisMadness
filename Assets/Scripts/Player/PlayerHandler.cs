@@ -11,10 +11,14 @@ public class PlayerHandler : Entity
     [SerializeField] protected float moveSpeed;
     [SerializeField] public int tokenCount;
     [SerializeField] private GameObject menu;
+    [SerializeField] private GameObject controlTab;
     
     [SerializeField] private GameObject GUIObject;
-    private Vector3 startPosition;
-    private Vector3 endPosition;
+    
+    private bool ControlTabOpen = false;
+    private Vector3 guiObjectEndPosition;
+    private Vector3 menuEndPosition;
+    private Vector3 controlTabEndPos;
     
     
     
@@ -42,8 +46,9 @@ public class PlayerHandler : Entity
 
     private void Start()
     {
-        startPosition = GUIObject.transform.position;
-        endPosition = GUIObject.transform.position  + Vector3.down * 150;
+        guiObjectEndPosition = GUIObject.transform.position  + Vector3.down * 150f;
+        controlTabEndPos = controlTab.transform.position;
+        menuEndPosition = menu.transform.position;
     }
 
     private void Update()
@@ -52,7 +57,16 @@ public class PlayerHandler : Entity
         {
             if (GameIsPaused)
             {
-                Resume();
+                if (ControlTabOpen)
+                {
+                    controlTabEndPos = controlTab.transform.position + Vector3.right * 1000f;
+                    menuEndPosition = menu.transform.position + Vector3.right * 1000f;
+                    ControlTabOpen = false;
+                }
+                else
+                {
+                    Resume();
+                }
             }
             else
             {
@@ -60,7 +74,9 @@ public class PlayerHandler : Entity
             }
         }
         
-        GUIObject.transform.position = Vector3.Lerp(GUIObject.transform.position, endPosition,  Time.deltaTime * 2f);
+        GUIObject.transform.position = Vector3.Lerp(GUIObject.transform.position, guiObjectEndPosition,  Time.unscaledDeltaTime * 2f);
+        controlTab.transform.position = Vector3.Lerp(controlTab.transform.position, controlTabEndPos, Time.unscaledDeltaTime * 2f);
+        menu.transform.position = Vector3.Lerp(menu.transform.position, menuEndPosition, Time.unscaledDeltaTime * 2f);
     }
 
     public void Resume()
@@ -75,6 +91,13 @@ public class PlayerHandler : Entity
         menu.SetActive(true);
         GameIsPaused = !GameIsPaused;
         Time.timeScale = 0;
+    }
+
+    public void Controls()
+    {
+        controlTabEndPos = controlTab.transform.position + Vector3.left * 1000f;
+        menuEndPosition = menu.transform.position + Vector3.left * 1000f;
+        ControlTabOpen = true;
     }
     
     public void StopGame()

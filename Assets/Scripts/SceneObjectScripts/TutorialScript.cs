@@ -53,7 +53,7 @@ public class TutorialScript : MonoBehaviour
             StartCoroutine(TutorialTextDropDown(new string[]
             {
                 "Welcome to the Tutorial!",
-                "To See Controls, Press ESC."
+                "To See Controls, Press ESC and goto Controls."
             }, 0.03f));
             _startedCoroutines = true;
         }
@@ -70,11 +70,13 @@ public class TutorialScript : MonoBehaviour
             _hasShownRotatePadText = true;
             StartCoroutine(TutorialTextDropDown(new string[]
             {
-                "Oh, this is a Rotate Pad!",
-                " And beside it, an Axis Token (The rotating thing)",
-                "If you've got at least one Axis Token, you can stand on this to rotate the world around you!",
-                "You've gotta press hold down shift to do it though."
-            },0.03f
+                "Oh, this is a Rotate Pad and Axis Token!",
+                "If you've got at least one Axis Token, you can use it to rotate the world around you!",
+                "Theres just one thing, you HAVE to stand on the Rotate Pad.",
+                "Controls for Axis Break: ",
+                "Axis Break(Hold Shift) and press Q to rotate it right or E to rotate it left.",
+                "Go ahead, try it!"
+            },0.045f
                 ));
         }
         startingText.transform.position = Vector3.Lerp(startingText.transform.position, targetPosition, Time.deltaTime * 4f);
@@ -97,7 +99,7 @@ public class TutorialScript : MonoBehaviour
             _isTypingFinished = false;
             StartCoroutine(TypeText(text, speed));
             yield return new WaitUntil(() => _isTypingFinished);
-            yield return new WaitForSecondsRealtime(1f);
+            yield return new WaitForSecondsRealtime(2.5f);
         }
 
         targetPosition = startingPosition + Vector3.up * 175;

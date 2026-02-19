@@ -20,8 +20,7 @@ public class CameraHandler : MonoBehaviour
         _targetRoundedPos = player.transform.position;
         targetCameraRotation = transform.rotation;
         targetPlayerRotation = player.transform.rotation;
-    
-        transform.position = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
+        
         targetPosition = transform.position + Vector3.down * CAMERA_Y_OFFSET;
     }
 
@@ -81,7 +80,7 @@ public class CameraHandler : MonoBehaviour
         if (!initialMoveDone && Vector3.Distance(transform.position, targetPosition) < 0.5f)
             initialMoveDone = true;
 
-        if (Input.GetKeyDown(KeyCode.R) || (player.GetComponent<CharacterOffScreen>().isOffscreen && automaticCameraReposition))
+        if (Input.GetKeyDown(KeyCode.R) || (player.GetComponent<CharacterOffScreen>().isOffscreen && automaticCameraReposition && initialMoveDone))
         {
             targetPosition = new Vector3(player.transform.position.x, targetPosition.y, player.transform.position.z);
         }
@@ -121,8 +120,6 @@ public class CameraHandler : MonoBehaviour
         yield return new WaitForSeconds(delay);
 
         automaticCameraReposition = false;
-        OverrideShouldMove = true;
-        player.GetComponent<PlayerMovement>().ShouldMove = false;
 
         Vector3 startPosition = transform.position;
         targetPosition = newPosition;
@@ -136,8 +133,6 @@ public class CameraHandler : MonoBehaviour
         yield return new WaitUntil(() => Vector3.Distance(transform.position, targetPosition) < 2f);
 
         automaticCameraReposition = true;
-        OverrideShouldMove = false;
-        player.GetComponent<PlayerMovement>().ShouldMove = true;
     }
     void ResetToggle()
     {
@@ -152,16 +147,6 @@ public class CameraHandler : MonoBehaviour
     
         if (OverrideShouldMove)
             return;
-    
-        if (Vector3.Distance(transform.position, targetPosition) > 5f)
-        {
-            ResetToggle();
-            player.GetComponent<PlayerMovement>().ShouldMove = false;
-        }
-        else
-        {
-            ToggleShouldMove(true);
-        }
     }
     
     public bool IsRotatingAnimation()
