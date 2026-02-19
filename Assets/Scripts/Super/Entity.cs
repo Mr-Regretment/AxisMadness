@@ -25,7 +25,7 @@ public abstract class Entity : MonoBehaviour
 
         Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
     
-        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f))
+        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 2.5f))
             return false;
     
         if (hitInfo.transform == null)
