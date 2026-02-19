@@ -51,7 +51,7 @@ public class TutorialScript : MonoBehaviour
             StartCoroutine(TutorialTextDropDown(new string[]
             {
                 "Welcome to the Tutorial!",
-                "To kick this off, I suggest we go right! right and left are 'A' / 'D"
+                "Right and left are 'A' / 'D, Jump is space"
             }));
             _startedCoroutines = true;
         }
