@@ -5,6 +5,7 @@ public class ObjectCollision : MonoBehaviour
 {
     public bool hasTouchedPlayer = false;
     [SerializeField] public String[] text;
+    [SerializeField] public float speed;
 
     private void OnTriggerEnter(Collider other)
     {

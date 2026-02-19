@@ -52,7 +52,8 @@ public class TutorialScript : MonoBehaviour
         {
             StartCoroutine(TutorialTextDropDown(new string[]
             {
-                "Welcome to the Tutorial!"
+                "Welcome to the Tutorial!",
+                "To See Controls, Press ESC."
             }, 0.03f));
             _startedCoroutines = true;
         }
@@ -61,7 +62,7 @@ public class TutorialScript : MonoBehaviour
         {
             hasActivatedTextDropdown = true;
             objectCollision.hasTouchedPlayer = false;
-            StartCoroutine(TutorialTextDropDown(objectCollision.text, 0.03f));
+            StartCoroutine(TutorialTextDropDown(objectCollision.text, objectCollision.speed));
         }
 
         if (playerCamera.StandingOverRotatePad() && !_hasShownRotatePadText)
@@ -69,7 +70,8 @@ public class TutorialScript : MonoBehaviour
             _hasShownRotatePadText = true;
             StartCoroutine(TutorialTextDropDown(new string[]
             {
-                "Oh, this is a Rotate Pad! And beside it, an Axis Token (The rotating thing)",
+                "Oh, this is a Rotate Pad!",
+                " And beside it, an Axis Token (The rotating thing)",
                 "If you've got at least one Axis Token, you can stand on this to rotate the world around you!",
                 "You've gotta press hold down shift to do it though."
             },0.03f
@@ -95,7 +97,7 @@ public class TutorialScript : MonoBehaviour
             _isTypingFinished = false;
             StartCoroutine(TypeText(text, speed));
             yield return new WaitUntil(() => _isTypingFinished);
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSecondsRealtime(1f);
         }
 
         targetPosition = startingPosition + Vector3.up * 175;

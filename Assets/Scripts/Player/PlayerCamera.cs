@@ -14,6 +14,7 @@ public class PlayerCamera : PlayerHandler
     private Image rightImage;
     private TextMeshProUGUI leftText;
     private TextMeshProUGUI rightText;
+    [SerializeField] protected GameObject guiTokenCount;
     void Start()
     {
         leftImage = leftRotateArrow.GetComponent<Image>();
@@ -38,6 +39,8 @@ public class PlayerCamera : PlayerHandler
     private float targetAlpha = 0f;
     private void Update()
     {
+        TextMeshProUGUI tokenCountGui = guiTokenCount.GetComponent<TextMeshProUGUI>();
+        tokenCountGui.text = tokenCount.ToString();
         Color leftImageColour = leftImage.color;
         Color rightImageColor = rightImage.color;
         Color leftTextColour = leftText.color;
