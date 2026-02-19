@@ -4,7 +4,7 @@ using UnityEngine;
 public class ObjectCollision : MonoBehaviour
 {
     public bool hasTouchedPlayer = false;
-    [SerializeField] public String text;
+    [SerializeField] public String[] text;
 
     private void OnTriggerEnter(Collider other)
     {
