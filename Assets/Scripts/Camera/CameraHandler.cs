@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class CameraHandler : MonoBehaviour
 {
+    #region  Variables
     [SerializeField] private float rotationSpeed = 5f;
     [SerializeField] private GameObject player;
     [SerializeField] private Quaternion targetCameraRotation;
@@ -13,7 +14,12 @@ public class CameraHandler : MonoBehaviour
     private bool initialMoveDone = false;
     private bool automaticCameraReposition = true;
     
+    private int _visibleLayer;
+    private int _hiddenLayer;
+    private int _fadingLayer;
+    
     private const float CAMERA_Y_OFFSET = 7.5f;
+    #endregion
     
     void Start()
     {
@@ -22,14 +28,83 @@ public class CameraHandler : MonoBehaviour
         targetPlayerRotation = player.transform.rotation;
         
         targetPosition = transform.position + Vector3.down * CAMERA_Y_OFFSET;
+        
+        _visibleLayer = LayerMask.NameToLayer("VisibleAxis");
+        _hiddenLayer = LayerMask.NameToLayer("HiddenAxis");
+        _fadingLayer = LayerMask.NameToLayer("FadingAxis");
     }
+    private void ToggleAxisLayers()
+    {
+        GameObject[] allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 
+        foreach (GameObject obj in allObjects)
+        {
+            if (obj.layer == _visibleLayer)
+                StartCoroutine(FadeObject(obj, 1f, 0f, _hiddenLayer));
+            else if (obj.layer == _hiddenLayer)
+                StartCoroutine(FadeObject(obj, 0f, 1f, _visibleLayer));
+        }
+    }
+    private IEnumerator FadeObject(GameObject obj, float startAlpha, float endAlpha, int targetLayer)
+    {
+        Renderer renderer = obj.GetComponent<Renderer>();
+
+        if (renderer == null)
+        {
+            obj.layer = targetLayer;
+            yield break;
+        }
+
+        // Get ALL materials on the renderer
+        Material[] materials = renderer.materials;
+
+        bool hasAlpha = false;
+        foreach (Material mat in materials)
+            if (mat.HasProperty("_Alpha"))
+                hasAlpha = true;
+
+        if (!hasAlpha)
+        {
+            renderer.enabled = endAlpha > 0f;
+            obj.layer = targetLayer;
+            yield break;
+        }
+
+        obj.layer = _fadingLayer;
+
+        foreach (Material mat in materials)
+            if (mat.HasProperty("_Alpha"))
+                mat.SetFloat("_Alpha", startAlpha);
+
+        float timer = 0f;
+        float duration = 0.5f;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float alpha = Mathf.Lerp(startAlpha, endAlpha, timer / duration);
+            foreach (Material mat in materials)
+                if (mat.HasProperty("_Alpha"))
+                    mat.SetFloat("_Alpha", alpha);
+            yield return null;
+        }
+
+        foreach (Material mat in materials)
+            if (mat.HasProperty("_Alpha"))
+                mat.SetFloat("_Alpha", endAlpha);
+
+        obj.layer = targetLayer;
+    }
     private void Rotation()
     {
+        if (isRotating)
+            return;
+
         PlayerCamera playerCamera = player.GetComponent<PlayerCamera>();
 
         if (playerCamera == null)
             return;
+
     
         if (!playerCamera.StandingOverRotatePad())
             return;
@@ -40,10 +115,11 @@ public class CameraHandler : MonoBehaviour
         if (playerCamera.tokenCount <= 0)
             return;
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && !Input.GetKeyDown(KeyCode.Q))
         {
             playerCamera.tokenCount--;
             isRotating = true;
+            ToggleAxisLayers();
             
             float x = (float)System.Math.Round(player.transform.position.x, 1);
             float z = (float)System.Math.Round(player.transform.position.z, 1);
@@ -55,10 +131,12 @@ public class CameraHandler : MonoBehaviour
             targetPlayerRotation *= Quaternion.Euler(0, -90f, 0);
         }
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q) && !Input.GetKeyDown(KeyCode.E))
         {
             playerCamera.tokenCount--;
             isRotating = true;
+            ToggleAxisLayers();
+
             float x = (float)System.Math.Round(player.transform.position.x, 1);
             float z = (float)System.Math.Round(player.transform.position.z, 1);
 
@@ -107,6 +185,7 @@ public class CameraHandler : MonoBehaviour
     }
 
     private bool hasToggledShouldMove = false;
+
     void ToggleShouldMove(bool shouldMoveSet)
     {
         if (!hasToggledShouldMove)
@@ -135,6 +214,7 @@ public class CameraHandler : MonoBehaviour
 
         automaticCameraReposition = true;
     }
+
     void ResetToggle()
     {
         hasToggledShouldMove = false;

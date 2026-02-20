@@ -26,7 +26,7 @@ public class ButtonHandler : MonoBehaviour
 
     private bool DetectObject()
     {
-        if (!Physics.Raycast(transform.position, Vector3.up, out RaycastHit hit, detectionRange))
+        if (!Physics.Raycast(transform.position, transform.TransformDirection(Vector3.up), out RaycastHit hit, detectionRange))
             return false;
 
         return hit.transform.CompareTag(PLAYER_TAG) || hit.transform.CompareTag(PHYSICS_TAG);

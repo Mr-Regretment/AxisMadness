@@ -6,25 +6,27 @@ Shader "Custom/AutoTile3TexturesDoor"
         _TopTex ("Top", 2D) = "white" {}
         _SideTex ("Sides", 2D) = "white" {}
         _BottomTex ("Bottom", 2D) = "white" {}
-        
+        _Alpha ("Alpha", Range(0, 1)) = 1
         _UVScale ("UV Scale", Range(0.01, 5)) = 1
         _SideYOffset ("Side Y Offset", Range(0, 1)) = 0.5
         _SideBottomThreshold ("Side/Bottom Threshold", Range(-5, 5)) = 0
         _TopThreshold ("Top Face Threshold", Range(0, 1)) = 0.9
     }
-    SubShader
-    {
-        Tags { "RenderType"="Opaque" }
+        SubShader
+        {
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
         LOD 200
+        ZWrite On
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows
+        #pragma surface surf Standard fullforwardshadows alpha:fade
         #pragma target 3.0
 
         sampler2D _MainTex;
         sampler2D _TopTex;
         sampler2D _SideTex;
         sampler2D _BottomTex;
+        float _Alpha;
         float _UVScale;
         float _SideYOffset;
         float _SideBottomThreshold;
@@ -54,27 +56,19 @@ Shader "Custom/AutoTile3TexturesDoor"
             fixed4 col;
             
             if (normal.y > _TopThreshold)
-            {
                 col = tex2D(_TopTex, fractUV);
-            }
             else if (normal.y < -_TopThreshold)
-            {
                 col = tex2D(_BottomTex, fractUV);
-            }
-            else // Sides and slopes
+            else
             {
                 if (localPos.y < _SideBottomThreshold)
-                {
                     col = tex2D(_BottomTex, fractUV);
-                }
                 else
-                {
                     col = tex2D(_SideTex, float2(fractUV.x, fractUV.y + _SideYOffset));
-                }
             }
             
             o.Albedo = col.rgb;
-            o.Alpha = col.a;
+            o.Alpha = col.a * _Alpha;
         }
         ENDCG
     }

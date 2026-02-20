@@ -19,9 +19,9 @@ TagManager:
   - Water
   - UI
   - TokenLayer
-  - 
-  - 
-  - 
+  - VisibleAxis
+  - HiddenAxis
+  - FadingAxis
   - 
   - 
   - 
