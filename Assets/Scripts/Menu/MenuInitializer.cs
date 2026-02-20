@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
+using Vector3 = UnityEngine.Vector3;
 
 public class MenuInitializer : MonoBehaviour
 {
@@ -9,14 +11,18 @@ public class MenuInitializer : MonoBehaviour
     [SerializeField] private VideoHandler _videoHandler;
     [SerializeField] private GameObject StartButton;
     [SerializeField] private GameObject QuitButton;
-    [SerializeField] private GameObject SettingsButton;
     [SerializeField] private UIHandler uiHandler;
+
+    [SerializeField] private float QuitFloat;
+    [SerializeField] private float StartFloat;
+    [SerializeField] private float StartFloatY;
     private bool animationStarted = false;
     private bool menuMovingBack = false;
 
     void Start()
     {
         _startPosition = TitleScreen.transform.position;
+        StartButton.transform.position = new Vector3(StartFloat,StartButton.transform.position.y,StartButton.transform.position.z);
     }
     
     void Update()
@@ -42,14 +48,11 @@ public class MenuInitializer : MonoBehaviour
         yield return StartCoroutine(TitleMoveTo(TitleScreen.transform.position + Vector3.down * 30, 3f));
         
         StartCoroutine(TitleMoveTo(TitleScreen.transform.position + Vector3.right * 10, 3f));
+
+
+        StartCoroutine(ButtonMoveTo(StartButton, new Vector3(StartFloat,QuitButton.transform.position.y + 50,StartButton.transform.position.z), 3f));
         
-        
-        
-        StartCoroutine(ButtonMoveTo(StartButton, StartButton.transform.position + Vector3.down * 485f, 3f));
-        
-        StartCoroutine(ButtonMoveTo(QuitButton, QuitButton.transform.position + Vector3.left * 1200f, 3f));
-        
-        StartCoroutine(ButtonMoveTo(SettingsButton, SettingsButton.transform.position + Vector3.right * 460f, 3f));
+        StartCoroutine(ButtonMoveTo(QuitButton, new Vector3(QuitFloat,QuitButton.transform.position.y,QuitButton.transform.position.z), 3f));
         
         _videoHandler.gameObject.SetActive(false);
     }
@@ -58,7 +61,7 @@ public class MenuInitializer : MonoBehaviour
     {
         StartCoroutine(ButtonMoveTo(StartButton, StartButton.transform.position + Vector3.left * 1000f, 3f));
         StartCoroutine(ButtonMoveTo(QuitButton, QuitButton.transform.position + Vector3.left * 1000f, 3f));
-        yield return StartCoroutine(ButtonMoveTo(SettingsButton, SettingsButton.transform.position + Vector3.left * 1000f, 3f));
+        yield return null;
     }
 
     IEnumerator TitleMoveTo(Vector3 targetPosition, float speed)
