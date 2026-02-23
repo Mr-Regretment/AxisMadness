@@ -11,6 +11,7 @@ public class MenuInitializer : MonoBehaviour
     [SerializeField] private VideoHandler _videoHandler;
     [SerializeField] private GameObject StartButton;
     [SerializeField] private GameObject QuitButton;
+    [SerializeField] private GameObject BackgroundPanel;
     [SerializeField] private UIHandler uiHandler;
 
     [SerializeField] private float QuitFloat;
@@ -50,9 +51,13 @@ public class MenuInitializer : MonoBehaviour
         StartCoroutine(TitleMoveTo(TitleScreen.transform.position + Vector3.right * 10, 3f));
 
 
-        StartCoroutine(ButtonMoveTo(StartButton, new Vector3(StartFloat,QuitButton.transform.position.y + 50,StartButton.transform.position.z), 3f));
+        StartCoroutine(ButtonMoveTo(StartButton, new Vector3(StartFloat,QuitButton.transform.position.y + 150,StartButton.transform.position.z), 3f));
         
         StartCoroutine(ButtonMoveTo(QuitButton, new Vector3(QuitFloat,QuitButton.transform.position.y,QuitButton.transform.position.z), 3f));
+        yield return new WaitForSecondsRealtime(0.05f);
+        StartCoroutine(ButtonMoveTo(QuitButton, new Vector3(QuitFloat,QuitButton.transform.position.y  + 25 ,QuitButton.transform.position.z), 3f));
+        
+        StartCoroutine(ButtonMoveTo(BackgroundPanel, new Vector3(260, BackgroundPanel.transform.position.y,BackgroundPanel.transform.position.z), 3f));
         
         _videoHandler.gameObject.SetActive(false);
     }
@@ -61,6 +66,7 @@ public class MenuInitializer : MonoBehaviour
     {
         StartCoroutine(ButtonMoveTo(StartButton, StartButton.transform.position + Vector3.left * 1000f, 3f));
         StartCoroutine(ButtonMoveTo(QuitButton, QuitButton.transform.position + Vector3.left * 1000f, 3f));
+        StartCoroutine(ButtonMoveTo(BackgroundPanel, BackgroundPanel.transform.position + Vector3.left * 1000, 3f));
         yield return null;
     }
 

@@ -14,9 +14,9 @@ public class CameraHandler : MonoBehaviour
     private bool initialMoveDone = false;
     private bool automaticCameraReposition = true;
     
-    private int _visibleLayer;
+    /*private int _visibleLayer;
     private int _hiddenLayer;
-    private int _fadingLayer;
+    private int _fadingLayer;*/
     
     private const float CAMERA_Y_OFFSET = 7.5f;
     #endregion
@@ -29,11 +29,12 @@ public class CameraHandler : MonoBehaviour
         
         targetPosition = transform.position + Vector3.down * CAMERA_Y_OFFSET;
         
-        _visibleLayer = LayerMask.NameToLayer("VisibleAxis");
+        /*_visibleLayer = LayerMask.NameToLayer("VisibleAxis");
         _hiddenLayer = LayerMask.NameToLayer("HiddenAxis");
-        _fadingLayer = LayerMask.NameToLayer("FadingAxis");
+        _fadingLayer = LayerMask.NameToLayer("FadingAxis");*/
     }
-    private void ToggleAxisLayers()
+    
+    /*private void ToggleAxisLayers()
     {
         GameObject[] allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 
@@ -94,7 +95,7 @@ public class CameraHandler : MonoBehaviour
                 mat.SetFloat("_Alpha", endAlpha);
 
         obj.layer = targetLayer;
-    }
+    }*/
     private void Rotation()
     {
         if (isRotating)
@@ -119,7 +120,6 @@ public class CameraHandler : MonoBehaviour
         {
             playerCamera.tokenCount--;
             isRotating = true;
-            ToggleAxisLayers();
             
             float x = (float)System.Math.Round(player.transform.position.x, 1);
             float z = (float)System.Math.Round(player.transform.position.z, 1);
@@ -135,7 +135,6 @@ public class CameraHandler : MonoBehaviour
         {
             playerCamera.tokenCount--;
             isRotating = true;
-            ToggleAxisLayers();
 
             float x = (float)System.Math.Round(player.transform.position.x, 1);
             float z = (float)System.Math.Round(player.transform.position.z, 1);
@@ -157,10 +156,11 @@ public class CameraHandler : MonoBehaviour
 
         if (!initialMoveDone && Vector3.Distance(transform.position, targetPosition) < 0.5f)
             initialMoveDone = true;
+        
 
-        if (Input.GetKeyDown(KeyCode.R) || (player.GetComponent<CharacterOffScreen>().isOffscreen && automaticCameraReposition && initialMoveDone))
+        if  ((player.GetComponent<CharacterOffScreen>().isOffscreen && automaticCameraReposition && initialMoveDone) || Input.GetKeyDown(KeyCode.R))
         {
-            targetPosition = new Vector3(player.transform.position.x, targetPosition.y, player.transform.position.z);
+            targetPosition = new Vector3(player.transform.position.x, player.transform.position.y,player.transform.position.z);
         }
 
         if (isRotating)

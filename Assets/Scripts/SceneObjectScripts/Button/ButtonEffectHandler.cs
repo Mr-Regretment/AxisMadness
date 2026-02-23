@@ -16,7 +16,7 @@ public class ButtonEffectHandler : MonoBehaviour
 
         [Header("Text Dropdown")] 
         public String[] text;
-        public TutorialScript tutorialScript;
+        public DialogueHandler dialogueHandler;
         
         [Header("CameraReposition For a Duration")]
         public Vector3 cameraTargetPosition;
@@ -29,7 +29,6 @@ public class ButtonEffectHandler : MonoBehaviour
         
         [HideInInspector] public Vector3 restPosition;
         [HideInInspector] public bool wasPressed;
-        
     }
     
     [SerializeField] private List<ButtonEffect> effects = new List<ButtonEffect>();
@@ -59,28 +58,24 @@ public class ButtonEffectHandler : MonoBehaviour
             if (effect.objectToMove != null)
                 MoveObject(effect, isPressed);
 
-            if (effect.tutorialScript != null && isPressed)
-            {
-                TutorialText(effect, effect.text);
-            }
+            if (effect.dialogueHandler != null && isPressed)
+                ShowDialogueText(effect, effect.text);
 
             if (effect.cameraTargetPosition != Vector3.zero && !effect.wasPressed && isPressed)
             {
                 effect.wasPressed = true;
-                StartCoroutine(cameraHandler.CameraMove(effect.cameraTargetPosition, effect.duration,1));
+                StartCoroutine(cameraHandler.CameraMove(effect.cameraTargetPosition, effect.duration, 1));
             }
-            
         }
-        
-        
     }
+
     private bool hasPressed = false;
 
-    private void TutorialText(ButtonEffect effect, String[] inputText)
+    private void ShowDialogueText(ButtonEffect effect, String[] inputText)
     {
         if (!hasPressed)
         {
-            StartCoroutine(effect.tutorialScript.TutorialTextDropDown(inputText, 0.03f));
+            StartCoroutine(effect.dialogueHandler.ShowDialogue(inputText, 0.03f));
             hasPressed = true;
         }
     }
@@ -102,9 +97,7 @@ public class ButtonEffectHandler : MonoBehaviour
         {
             float distance = Vector3.Distance(effect.objectToMove.transform.position, target);
             if (distance < 2f)
-            {
                 effect.objectToMove.SetActive(false);
-            }
         }
         else
         {
@@ -115,9 +108,6 @@ public class ButtonEffectHandler : MonoBehaviour
     private void HandleToggle(ButtonEffect effect, bool isPressed)
     {
         if (isPressed)
-        {
             effect.objectToToggle.SetActive(true);
-        }
     }
-    
 }

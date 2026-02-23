@@ -6,7 +6,7 @@ Shader "Custom/AutoTile3Textures"
         _TopTex ("Top", 2D) = "white" {}
         _SideTex ("Sides", 2D) = "white" {}
         _BottomTex ("Bottom", 2D) = "white" {}
-        _Alpha ("Alpha", Range(0, 1)) = 1
+        
         _TileScale ("Tile Scale", Range(0.1, 5)) = 1
         _MaxSideTiles ("Max Side Tiles", Range(1, 10)) = 3
         _SideYOffset ("Side Y Offset", Range(-5, 5)) = 0
@@ -14,12 +14,11 @@ Shader "Custom/AutoTile3Textures"
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="Opaque" }
         LOD 200
-        ZWrite On
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows alpha:fade
+        #pragma surface surf Standard fullforwardshadows
         #pragma target 3.0
 
         sampler2D _MainTex;
@@ -27,7 +26,6 @@ Shader "Custom/AutoTile3Textures"
         sampler2D _SideTex;
         sampler2D _BottomTex;
         
-        float _Alpha;
         float _TileScale;
         float _MaxSideTiles;
         float _SideYOffset;
@@ -47,21 +45,25 @@ Shader "Custom/AutoTile3Textures"
             
             if (abs(normal.y) > _TopThreshold)
             {
+                // Top/Bottom
                 float2 uv = frac(IN.worldPos.xz * _TileScale);
                 col = (normal.y > 0) ? tex2D(_TopTex, uv) : tex2D(_BottomTex, uv);
             }
             else
             {
+                // Sides with max tile limit and Y offset
                 float h = (abs(normal.z) > abs(normal.x)) ? IN.worldPos.x : IN.worldPos.z;
                 float tiledY = (IN.worldPos.y + _SideYOffset) * _TileScale;
                 
                 if (tiledY > _MaxSideTiles)
                 {
+                    // Above max side tiles - use top texture with tiling
                     float2 uv = frac(float2(h * _TileScale, tiledY));
                     col = tex2D(_TopTex, uv);
                 }
                 else
                 {
+                    // Use side texture
                     tiledY = clamp(tiledY, 0, _MaxSideTiles);
                     float2 uv = float2(frac(h * _TileScale), frac(tiledY));
                     col = tex2D(_SideTex, uv);
@@ -69,7 +71,7 @@ Shader "Custom/AutoTile3Textures"
             }
             
             o.Albedo = col.rgb;
-            o.Alpha = col.a * _Alpha;
+            o.Alpha = col.a;
         }
         ENDCG
     }
