@@ -1439,7 +1439,7 @@ MonoBehaviour:
     hasPlayed: 0
   - lines:
     - Always wondered why there was a crossroad here..
-    - It's not like the average person go there!
+    - It's not like the average person can move in that direction!
     triggerScript: {fileID: 1375377958}
     triggerMethodName: HasBeenActivated
     speed: 0.05
