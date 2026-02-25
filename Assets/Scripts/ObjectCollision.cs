@@ -12,8 +12,15 @@ public class ObjectCollision : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             hasTouchedPlayer = true;
+            CameraHandler cameraHandler = FindFirstObjectByType<CameraHandler>();
+            cameraHandler.RelocateCameraToPlayer();
             Invoke(nameof(Destroy), 2.5f);
         }
+    }
+
+    public bool HasBeenActivated()
+    {
+        return hasTouchedPlayer;
     }
 
     void Destroy()

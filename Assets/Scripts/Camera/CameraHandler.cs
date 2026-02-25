@@ -6,7 +6,7 @@ public class CameraHandler : MonoBehaviour
     #region Variables
     [SerializeField] private float rotationSpeed = 5f;
     [SerializeField] private GameObject player;
-    [SerializeField] private Quaternion targetCameraRotation;
+    [SerializeField] public Quaternion targetCameraRotation;
     private Quaternion targetPlayerRotation;
     public Vector3 targetPosition;
     [SerializeField] private bool isRotating = false;
@@ -28,6 +28,7 @@ public class CameraHandler : MonoBehaviour
     private PlayerCamera _playerCamera;
     private CharacterOffScreen _characterOffScreen;
 
+    public bool HasUnconfirmedRotation => _onRotatePad && (_previewCameraRotation != _confirmedCameraRotation);
     private bool _isRepositioning = false;
     private bool _rotationConfirmed = false;
 
@@ -46,7 +47,7 @@ public class CameraHandler : MonoBehaviour
         targetPlayerRotation = player.transform.rotation;
         targetPosition = transform.position + Vector3.down * CAMERA_Y_OFFSET;
     }
-
+    
     private void Rotation()
     {
         if (isRotating)
@@ -230,6 +231,11 @@ public class CameraHandler : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, targetCameraRotation, Time.deltaTime * 5f);
         player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetPlayerRotation, Time.deltaTime * rotationSpeed);
         transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime * 2f);
+    }
+
+    public void RelocateCameraToPlayer()
+    {
+        targetPosition = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
     }
 
     public IEnumerator CameraMove(Vector3 newPosition, float duration, float delay)

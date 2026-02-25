@@ -8,8 +8,11 @@ public class PlayerCamera : PlayerHandler
     private Renderer _renderer;
     private PlayerMovement _playerMovement;
     
-    [SerializeField] protected GameObject leftRotateArrow;
-    [SerializeField] protected GameObject rightRotateArrow;
+    [SerializeField] private GameObject leftRotateArrow;
+    [SerializeField] private GameObject rightRotateArrow;
+    [SerializeField] private GameObject acceptNewRotationText;
+    private Vector3 acceptedCameraRotationTargetPos;
+    private Vector3 acceptedCameraRotationStartingPos;
     private Image leftImage;
     private Image rightImage;
     private TextMeshProUGUI leftText;
@@ -22,7 +25,8 @@ public class PlayerCamera : PlayerHandler
     {
         leftImage = leftRotateArrow.GetComponent<Image>();
         rightImage = rightRotateArrow.GetComponent<Image>();
-        
+        if (acceptNewRotationText != null)
+            acceptedCameraRotationStartingPos = acceptNewRotationText.transform.position;
         leftText = leftRotateArrow.GetComponentInChildren<TextMeshProUGUI>();
         rightText = rightRotateArrow.GetComponentInChildren<TextMeshProUGUI>();
     
@@ -41,6 +45,20 @@ public class PlayerCamera : PlayerHandler
     private float targetAlpha = 0f;
     private void Update()
     {
+        if (acceptNewRotationText != null && StandingOverRotatePad())
+        {
+            if (cameraHandler.HasUnconfirmedRotation)
+                acceptedCameraRotationTargetPos = acceptedCameraRotationStartingPos + (Vector3.down * 65);
+            else
+                acceptedCameraRotationTargetPos = acceptedCameraRotationStartingPos;
+        }
+        else
+        {
+            acceptedCameraRotationTargetPos = acceptedCameraRotationStartingPos;
+        }
+
+        acceptNewRotationText.transform.position = Vector3.Lerp(acceptNewRotationText.transform.position,acceptedCameraRotationTargetPos, Time.deltaTime * 8f);
+        
         TextMeshProUGUI tokenCountGui = guiTokenCount.GetComponent<TextMeshProUGUI>();
         tokenCountGui.text = tokenCount.ToString();
         Color leftImageColour = leftImage.color;

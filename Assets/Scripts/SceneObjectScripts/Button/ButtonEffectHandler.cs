@@ -60,12 +60,6 @@ public class ButtonEffectHandler : MonoBehaviour
 
             if (effect.dialogueHandler != null && isPressed)
                 ShowDialogueText(effect, effect.text);
-
-            if (effect.cameraTargetPosition != Vector3.zero && !effect.wasPressed && isPressed)
-            {
-                effect.wasPressed = true;
-                StartCoroutine(cameraHandler.CameraMove(effect.cameraTargetPosition, effect.duration, 1));
-            }
         }
     }
 
