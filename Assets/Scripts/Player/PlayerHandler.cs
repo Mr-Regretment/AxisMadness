@@ -65,7 +65,7 @@ public class PlayerHandler : Entity
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && !player.GetComponent<PlayerCamera>().StandingOverRotatePad())
         {
             if (GameIsPaused)
             {

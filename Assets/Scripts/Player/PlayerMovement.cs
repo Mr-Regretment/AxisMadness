@@ -3,6 +3,7 @@
 public class PlayerMovement : PlayerHandler
 {
     public bool ShouldMove;
+    public bool ShouldJump;
     [SerializeField] private bool displayShouldMove;
     [SerializeField] private GameObject GeometryGameObject;
     protected void FixedUpdate()
@@ -51,7 +52,7 @@ public class PlayerMovement : PlayerHandler
 
     private void HandleJumping()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
+        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded() && ShouldJump)
         {
             rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }

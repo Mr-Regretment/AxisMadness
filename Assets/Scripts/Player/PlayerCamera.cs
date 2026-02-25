@@ -15,6 +15,9 @@ public class PlayerCamera : PlayerHandler
     private TextMeshProUGUI leftText;
     private TextMeshProUGUI rightText;
     [SerializeField] protected GameObject guiTokenCount;
+
+    private GameObject _currentRotatePad;
+
     void Start()
     {
         leftImage = leftRotateArrow.GetComponent<Image>();
@@ -29,7 +32,6 @@ public class PlayerCamera : PlayerHandler
         rightImageColor.a = 0;
         
         _renderer = GetComponent<Renderer>();
-        
         _playerMovement = GetComponent<PlayerMovement>();
         
         if (cameraHandler == null)
@@ -46,7 +48,7 @@ public class PlayerCamera : PlayerHandler
         Color leftTextColour = leftText.color;
         Color rightTextColour = rightText.color;
         
-        targetAlpha = Input.GetKey(KeyCode.LeftShift) && StandingOverRotatePad()? 1 : 0;
+        targetAlpha = Input.GetKey(KeyCode.LeftShift) && StandingOverRotatePad() ? 1 : 0;
             
         leftImageColour.a = Mathf.Lerp(leftImageColour.a, targetAlpha, Time.deltaTime * 10f);
         rightImageColor.a = Mathf.Lerp(rightTextColour.a, targetAlpha, Time.deltaTime * 10f);
@@ -65,16 +67,30 @@ public class PlayerCamera : PlayerHandler
             return false;
 
         Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
-    
-        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f))
-            return false;
-    
-        if (hitInfo.transform == null)
-            return false;
 
-        return hitInfo.transform.CompareTag("RotatePad");
+        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 1.5f))
+        {
+            _currentRotatePad = null;
+            return false;
+        }
+
+        if (hitInfo.transform == null)
+        {
+            _currentRotatePad = null;
+            return false;
+        }
+
+        if (hitInfo.transform.CompareTag("RotatePad"))
+        {
+            _currentRotatePad = hitInfo.transform.gameObject;
+            return true;
+        }
+
+        _currentRotatePad = null;
+        return false;
     }
-    
+
+    public GameObject CurrentRotatePad() => _currentRotatePad;
 
     public bool OnScreen() => _renderer.isVisible;
     public bool OffScreen() => !_renderer.isVisible;

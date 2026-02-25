@@ -9,34 +9,43 @@ public class GlitchEffect : MonoBehaviour
     [SerializeField] private float glitchIntensity = 0.5f;
     [SerializeField] private float redVignetteIntensity = 0.3f;
     [SerializeField] private float blueVignetteIntensity = 0.3f;
+    [SerializeField] private float glitchDuration = 1f;
+
     private bool shouldGlitch = false;
+    private float glitchTimer = 0f;
 
     private void Start()
     {
         if (glitchMaterial == null)
-        {
             glitchMaterial = new Material(Shader.Find("Hidden/Kino/Glitch/Analog"));
-        }
-        
+
         if (vignetteMaterial == null)
-        {
             vignetteMaterial = new Material(Shader.Find("Hidden/Vignette"));
-        }
+    }
+
+    public void TriggerGlitch()
+    {
+        shouldGlitch = true;
+        glitchTimer = glitchDuration;
     }
 
     private void Update()
     {
         if (cameraHandler.IsRotatingAnimation())
-            shouldGlitch = true;
-        else
-            shouldGlitch = false;
+            TriggerGlitch();
+
+        if (glitchTimer > 0f)
+        {
+            glitchTimer -= Time.deltaTime;
+            if (glitchTimer <= 0f)
+                shouldGlitch = false;
+        }
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         RenderTexture temp = RenderTexture.GetTemporary(source.width, source.height);
-        
-        // Apply glitch
+
         if (shouldGlitch && glitchMaterial != null)
         {
             glitchMaterial.SetVector("_ScanLineJitter", new Vector2(0.1f * glitchIntensity, 0.5f));
@@ -49,8 +58,7 @@ public class GlitchEffect : MonoBehaviour
         {
             Graphics.Blit(source, temp);
         }
-        
-        // Apply vignette
+
         if (shouldGlitch && vignetteMaterial != null)
         {
             vignetteMaterial.SetFloat("_RedIntensity", redVignetteIntensity);
@@ -61,7 +69,7 @@ public class GlitchEffect : MonoBehaviour
         {
             Graphics.Blit(temp, destination);
         }
-        
+
         RenderTexture.ReleaseTemporary(temp);
     }
 }

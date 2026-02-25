@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,38 +9,41 @@ public class DialogueHandler : MonoBehaviour
     [System.Serializable]
     public class DialogueLine
     {
-        [Tooltip("Static lines to display in sequence.")]
+        [Tooltip("Lines to display in sequence.")]
         public List<string> lines = new List<string>();
 
-        [Tooltip("Optional: A MonoBehaviour script with a method that returns a string.")]
-        public MonoBehaviour sourceScript;
-
-        [Tooltip("Optional: The name of the method on the source script to call.")]
-        public string methodName;
+        [Header("Trigger Condition")]
+        [Tooltip("Optional: fires when this method returns true. Leave empty to fire immediately.")]
+        public MonoBehaviour triggerScript;
+        public string triggerMethodName;
 
         public float speed = 0.05f;
+        public float waitTime = 2.5f;
+        public bool canSkip = true;
 
-        public string[] GetLines()
+        [HideInInspector] public bool hasPlayed = false;
+
+        public bool IsTriggerMet()
         {
-            if (sourceScript != null && !string.IsNullOrEmpty(methodName))
-            {
-                MethodInfo method = sourceScript.GetType().GetMethod(methodName);
-                if (method != null && method.ReturnType == typeof(string))
-                    return new string[] { (string)method.Invoke(sourceScript, null) };
-                else
-                    Debug.LogWarning($"DialogueLine: Method '{methodName}' not found or doesn't return string on {sourceScript.GetType().Name}");
-            }
-            return lines.ToArray();
+            if (triggerScript == null || string.IsNullOrEmpty(triggerMethodName))
+                return true;
+
+            MethodInfo method = triggerScript.GetType().GetMethod(triggerMethodName);
+            if (method != null && method.ReturnType == typeof(bool))
+                return (bool)method.Invoke(triggerScript, null);
+
+            Debug.LogWarning($"DialogueLine: Trigger method '{triggerMethodName}' not found or doesn't return bool on {triggerScript.GetType().Name}");
+            return false;
         }
     }
-    
+
     [Header("References")]
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject dialoguePanel;
+    [SerializeField] private GameObject skipTextPanel;
     [SerializeField] private GameObject cameraHandler;
-    [SerializeField] private ObjectCollision objectCollision;
     [SerializeField] private PlayerCamera playerCamera;
-    
+
     [Header("Dialogue")]
     [SerializeField] private List<DialogueLine> dialogueLines = new List<DialogueLine>();
 
@@ -49,10 +51,8 @@ public class DialogueHandler : MonoBehaviour
 
     private bool _isReady;
     private bool _isTypingFinished;
-    private bool _dialogueQueued;
     private bool _skipLine;
     private bool _isDialogueActive;
-    private bool _hasShownPadDialogue;
 
     private Vector3 targetPosition;
     private Vector3 hiddenPosition;
@@ -92,23 +92,17 @@ public class DialogueHandler : MonoBehaviour
         if (!_isReady)
             return;
 
-        if (!_dialogueQueued && dialogueLines.Count > 0)
+        if (!_isDialogueActive)
         {
-            _dialogueQueued = true;
-            StartCoroutine(ShowDialogueLines(dialogueLines));
-        }
-
-        if (playerCamera != null && playerCamera.StandingOverRotatePad() && !_hasShownPadDialogue)
-        {
-            _hasShownPadDialogue = true;
-            StartCoroutine(ShowDialogue(new string[]
+            foreach (DialogueLine entry in dialogueLines)
             {
-                "Oh, this is a Rotate Pad and Axis Token!",
-                "Rotate Pads can be used to rotate the world around you at the cost of an Axis Token.",
-                "Controls for Axis Break: ",
-                "Axis Break(Hold Shift) and press Q to rotate it right or E to rotate it left.",
-                "Go ahead, try it!"
-            }, 0.045f));
+                if (!entry.hasPlayed && entry.IsTriggerMet())
+                {
+                    entry.hasPlayed = true;
+                    StartCoroutine(ShowDialogueEntry(entry));
+                    break;
+                }
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.Backspace))
@@ -118,39 +112,45 @@ public class DialogueHandler : MonoBehaviour
             dialoguePanel.transform.position, targetPosition, Time.deltaTime * 4f);
     }
 
-    // Run a List of DialogueLines (respects per-line speed and dynamic text)
-    public IEnumerator ShowDialogueLines(List<DialogueLine> dialogueLines)
+    private IEnumerator ShowDialogueEntry(DialogueLine entry)
     {
-        List<string> resolvedLines = new List<string>();
-        List<float> speeds = new List<float>();
+        string[] lines = entry.lines.ToArray();
+        float[] speeds = new float[lines.Length];
+        float[] waitTimes = new float[lines.Length];
+        bool[] canSkips = new bool[lines.Length];
 
-        foreach (var entry in dialogueLines)
+        for (int i = 0; i < lines.Length; i++)
         {
-            foreach (var line in entry.GetLines())
-            {
-                resolvedLines.Add(line);
-                speeds.Add(entry.speed);
-            }
+            speeds[i] = entry.speed;
+            waitTimes[i] = entry.waitTime;
+            canSkips[i] = entry.canSkip;
         }
 
-        yield return StartCoroutine(ShowDialogueWithSpeeds(resolvedLines.ToArray(), speeds.ToArray()));
+        yield return StartCoroutine(ShowDialogueWithSpeeds(lines, speeds, waitTimes, canSkips));
     }
 
-    // Convenience overload: uniform speed, string array
     public IEnumerator ShowDialogue(string[] lines, float speed)
     {
         float[] speeds = new float[lines.Length];
-        for (int i = 0; i < speeds.Length; i++) speeds[i] = speed;
-        yield return StartCoroutine(ShowDialogueWithSpeeds(lines, speeds));
+        float[] waitTimes = new float[lines.Length];
+        bool[] canSkips = new bool[lines.Length];
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            speeds[i] = speed;
+            waitTimes[i] = 2.5f;
+            canSkips[i] = true;
+        }
+
+        yield return StartCoroutine(ShowDialogueWithSpeeds(lines, speeds, waitTimes, canSkips));
     }
 
-    // Convenience overload: single string
     public IEnumerator ShowDialogue(string text, float speed)
     {
         yield return StartCoroutine(ShowDialogue(new string[] { text }, speed));
     }
 
-    private IEnumerator ShowDialogueWithSpeeds(string[] lines, float[] speeds)
+    private IEnumerator ShowDialogueWithSpeeds(string[] lines, float[] speeds, float[] waitTimes, bool[] canSkips)
     {
         if (_isDialogueActive) yield break;
         _isDialogueActive = true;
@@ -163,12 +163,14 @@ public class DialogueHandler : MonoBehaviour
 
         for (int i = 0; i < lines.Length; i++)
         {
+            skipTextPanel.SetActive(canSkips[i]);
+
             _isTypingFinished = false;
             StartCoroutine(AnimateText(lines[i], speeds[i]));
             yield return new WaitUntil(() => _isTypingFinished);
 
             float timer = 0f;
-            while (timer < 2.5f && !_skipLine)
+            while (timer < waitTimes[i] && !_skipLine)
             {
                 timer += Time.unscaledDeltaTime;
                 yield return null;
@@ -176,6 +178,7 @@ public class DialogueHandler : MonoBehaviour
             _skipLine = false;
         }
 
+        skipTextPanel.SetActive(false);
         targetPosition = hiddenPosition + Vector3.up * 175;
         cameraHandler.GetComponent<CameraHandler>().OverrideShouldMove = false;
         player.GetComponent<PlayerMovement>().ShouldMove = true;

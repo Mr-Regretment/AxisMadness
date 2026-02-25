@@ -18,7 +18,7 @@ public abstract class Entity : MonoBehaviour
         health = value;
     }
     
-    protected bool IsGrounded()
+    public bool IsGrounded()
     {
         if (rigidbody == null)
             return false;
