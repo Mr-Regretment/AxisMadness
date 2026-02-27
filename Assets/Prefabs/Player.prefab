@@ -45381,7 +45381,6 @@ GameObject:
   - component: {fileID: 9112036851370517446}
   - component: {fileID: 3732776160557533037}
   - component: {fileID: 5265910071930266872}
-  - component: {fileID: 2376312434209136524}
   - component: {fileID: 9165967028531780744}
   m_Layer: 0
   m_Name: Menu
@@ -45450,14 +45449,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 0.5
---- !u!81 &2376312434209136524
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9077714685995981747}
-  m_Enabled: 1
 --- !u!114 &9165967028531780744
 MonoBehaviour:
   m_ObjectHideFlags: 0

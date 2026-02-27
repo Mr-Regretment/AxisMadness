@@ -1419,27 +1419,34 @@ MonoBehaviour:
   - lines:
     - It's a Rotate Pad!
     - These are Reality-Bending pads that can allow you to change your direction!
-    - I'll Give you a guide if you want, but if not then just skip all of it.
+    - I'll Give you a guide now if you want, but if not then just skip all of it.
+    - (To see the guide outside of the Tutorial, just go to the Menu, and then go
+      to Guides!
+    - ' It should be the only one there.)'
     - 'Guide:'
     - Step on the Rotate Pad.
     - Once you do, hold down Axis Break (LShift)
-    - 'This will make two icons appear that represent your Rotation Direction-     
-      one for left, and one for right!     '
-    - Pressing these will make the world rotate beneath you, allowing you to reach
-      areas you couldn't Before!
+    - This makes two Icons show, each one with a Key mapped to it.
+    - Pressing these will make the world rotate beneath you in the direction of the
+      key.
+    - However, before rotating, you need an Axis Token -the rotating object near
+      the pad.
+    - 'These tokens are used up when you rotate. '
+    - So use them wisely
     - '''Esc'' will reset your rotation!'
-    - '''Enter'' will cause the world to be permanently set to your selected rotation!'
+    - '''Enter'' will cause the world to be set to your selected rotation!'
+    - Your rotation is also reset when you leave the Rotate Pad and haven't selected
+      a new direction.
     - To leave the Rotate Pad, Jump!
     - Try it!
     triggerScript: {fileID: 278778011}
     triggerMethodName: HasBeenActivated
-    speed: 0.06
-    waitTime: 2.5
+    speed: 0.05
+    waitTime: 3.5
     canSkip: 1
     hasPlayed: 0
   - lines:
-    - Always wondered why there was a crossroad here..
-    - It's not like the average person can move in that direction!
+    - Oh, a crossroad!
     triggerScript: {fileID: 1375377958}
     triggerMethodName: HasBeenActivated
     speed: 0.05

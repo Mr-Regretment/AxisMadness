@@ -183,8 +183,6 @@ public class CameraHandler : MonoBehaviour
             if (Vector3.Distance(transform.position, newTarget) > 1f && !_isRepositioning)
             {
                 _isRepositioning = true;
-                if (!OverrideShouldMove)
-                    _playerMovement.ShouldMove = false;
             }
 
             targetPosition = newTarget;
@@ -197,8 +195,6 @@ public class CameraHandler : MonoBehaviour
             if (Vector3.Distance(transform.position, targetPosition) < 1f || isAirborne)
             {
                 _isRepositioning = false;
-                if (!OverrideShouldMove)
-                    _playerMovement.ShouldMove = true;
             }
         }
 
@@ -230,7 +226,7 @@ public class CameraHandler : MonoBehaviour
         Rotation();
         transform.rotation = Quaternion.Slerp(transform.rotation, targetCameraRotation, Time.deltaTime * 5f);
         player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetPlayerRotation, Time.deltaTime * rotationSpeed);
-        transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime * 2f);
+        transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime * 4f);
     }
 
     public void RelocateCameraToPlayer()
