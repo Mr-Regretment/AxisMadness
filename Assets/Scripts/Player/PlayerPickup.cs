@@ -36,7 +36,7 @@ namespace Player
                 }
             }
             
-            if (_nearestObj != null && Input.GetKeyDown(KeyCode.E) && !Input.GetKey(KeyCode.LeftShift))
+            if (_nearestObj != null && Input.GetKeyDown(KeyCode.E) && !GetComponent<PlayerCamera>().StandingOverRotatePad())
             {
                 pickingUp = true;
                 _elapsedTime = 0f;

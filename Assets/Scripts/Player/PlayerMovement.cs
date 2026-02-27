@@ -6,6 +6,7 @@ public class PlayerMovement : PlayerHandler
     public bool ShouldJump;
     [SerializeField] private bool displayShouldMove;
     [SerializeField] private GameObject GeometryGameObject;
+    [SerializeField] private CameraHandler cameraHandler;
     protected void FixedUpdate()
     {
         displayShouldMove = ShouldMove;
@@ -22,9 +23,10 @@ public class PlayerMovement : PlayerHandler
     {
         moveSpeed = 10;
         float vertical = Input.GetAxis("Horizontal");
-
         float speed = ShouldMove ? vertical * moveSpeed : 0f;
-        Vector3 movement = transform.forward * speed;
+
+        Vector3 axis = cameraHandler != null ? cameraHandler.MovementAxis : transform.forward;
+        Vector3 movement = axis * speed;
 
         Vector3 currentVelocity = rigidbody.linearVelocity;
         Vector3 targetVelocity = new Vector3(movement.x, currentVelocity.y, movement.z);

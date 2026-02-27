@@ -60,6 +60,7 @@ public class PlayerHandler : Entity
 
     private void Update()
     {
+        
         if (transform.position.y < -3 && !IsGrounded())
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

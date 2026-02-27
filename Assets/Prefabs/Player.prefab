@@ -7789,10 +7789,10 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
+  m_SortingLayerID: -280520621
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!114 &4109859338297009335
@@ -9108,7 +9108,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1880895194211036921}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.00024414068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: -0.6848999, y: 0.6849, z: 0.6848999}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9117,7 +9117,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -49.99978, y: 0}
+  m_AnchoredPosition: {x: -50, y: 0}
   m_SizeDelta: {x: 150, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1974695639108793675
@@ -9282,8 +9282,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -7.5}
+  m_SizeDelta: {x: 0, y: -25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6652492605416503997
 CanvasRenderer:
@@ -9568,7 +9568,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '''Enter'' to Accept new Rotation'
+  m_text: '''Enter'' to Accept new Rotation; ''Esc'' To reset it.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 21e0c6f0dd7dba747a6caef8bb567355, type: 2}
   m_sharedMaterial: {fileID: 4961191703159571059, guid: 21e0c6f0dd7dba747a6caef8bb567355, type: 2}
@@ -17794,10 +17794,10 @@ RectTransform:
   - {fileID: 1461309770688622292}
   m_Father: {fileID: 1894778219150583722}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1110.0009, y: 0}
-  m_SizeDelta: {x: 850, y: 415}
+  m_AnchorMin: {x: 1, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 555, y: 0}
+  m_SizeDelta: {x: 1100, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4413385857474936879
 CanvasRenderer:
@@ -29437,7 +29437,7 @@ MonoBehaviour:
   cameraHandler: {fileID: 0}
   leftRotateArrow: {fileID: 7618123659398475445}
   rightRotateArrow: {fileID: 1880895194211036921}
-  acceptNewRotationText: {fileID: 0}
+  acceptNewRotationText: {fileID: 6384850300398560350}
   guiTokenCount: {fileID: 8188593354190212475}
 --- !u!114 &6267977060869865062
 MonoBehaviour:
@@ -29485,6 +29485,7 @@ MonoBehaviour:
   ShouldJump: 1
   displayShouldMove: 1
   GeometryGameObject: {fileID: 3895145909837213939}
+  cameraHandler: {fileID: 0}
 --- !u!114 &2490352507801295504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -38205,7 +38206,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 50.000065, y: 0}
+  m_AnchoredPosition: {x: 50, y: 0}
   m_SizeDelta: {x: 150, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5845056780196612348
@@ -41317,8 +41318,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 125.00004, y: 100}
-  m_SizeDelta: {x: 250, y: 100}
+  m_AnchoredPosition: {x: -30, y: 100}
+  m_SizeDelta: {x: 50, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &418087188946835416
 CanvasRenderer:
@@ -45408,7 +45409,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.00024410337, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3732776160557533037

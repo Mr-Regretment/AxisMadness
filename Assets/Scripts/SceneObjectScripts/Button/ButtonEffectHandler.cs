@@ -26,9 +26,12 @@ public class ButtonEffectHandler : MonoBehaviour
         public float moveDistance = 20f;
         public bool moveUpward = true;
         public float moveSpeed = 2f;
-        
+        public bool despawn = true;
+        public bool stayOnRelease = false;
+
         [HideInInspector] public Vector3 restPosition;
         [HideInInspector] public bool wasPressed;
+        [HideInInspector] public bool hasReachedTarget = false;
     }
     
     [SerializeField] private List<ButtonEffect> effects = new List<ButtonEffect>();
@@ -77,9 +80,14 @@ public class ButtonEffectHandler : MonoBehaviour
     private void MoveObject(ButtonEffect effect, bool isPressed)
     {
         Vector3 direction = effect.moveUpward ? Vector3.up : Vector3.down;
-        Vector3 target = isPressed 
-            ? effect.restPosition + direction * effect.moveDistance 
-            : effect.restPosition;
+        Vector3 movedPosition = effect.restPosition + direction * effect.moveDistance;
+
+        if (isPressed)
+            effect.hasReachedTarget = false;
+
+        Vector3 target = isPressed
+            ? movedPosition
+            : (effect.stayOnRelease && effect.hasReachedTarget ? movedPosition : effect.restPosition);
 
         effect.objectToMove.transform.position = Vector3.Lerp(
             effect.objectToMove.transform.position,
@@ -89,11 +97,15 @@ public class ButtonEffectHandler : MonoBehaviour
 
         if (isPressed)
         {
-            float distance = Vector3.Distance(effect.objectToMove.transform.position, target);
+            float distance = Vector3.Distance(effect.objectToMove.transform.position, movedPosition);
             if (distance < 2f)
-                effect.objectToMove.SetActive(false);
+            {
+                effect.hasReachedTarget = true;
+                if (effect.despawn)
+                    effect.objectToMove.SetActive(false);
+            }
         }
-        else
+        else if (!effect.stayOnRelease && effect.despawn)
         {
             effect.objectToMove.SetActive(true);
         }

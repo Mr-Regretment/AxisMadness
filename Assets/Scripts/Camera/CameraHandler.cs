@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -45,7 +46,18 @@ public class CameraHandler : MonoBehaviour
         _targetRoundedPos = player.transform.position;
         targetCameraRotation = transform.rotation;
         targetPlayerRotation = player.transform.rotation;
+        _confirmedCameraRotation = transform.rotation;
+        _confirmedPlayerRotation = player.transform.rotation;
         targetPosition = transform.position + Vector3.down * CAMERA_Y_OFFSET;
+    }
+    public Vector3 MovementAxis
+    {
+        get
+        {
+            Vector3 forward = _confirmedPlayerRotation * Vector3.forward;
+            forward.y = 0f;
+            return forward.normalized;
+        }
     }
     
     private void Rotation()
@@ -122,7 +134,7 @@ public class CameraHandler : MonoBehaviour
             return;
         }
 
-        if (!Input.GetKey(KeyCode.LeftShift) || _playerCamera.tokenCount <= 0)
+        if (!_playerCamera.StandingOverRotatePad() || _playerCamera.tokenCount <= 0)
             return;
 
         if (Input.GetKeyDown(KeyCode.Q) && !Input.GetKeyDown(KeyCode.E))
