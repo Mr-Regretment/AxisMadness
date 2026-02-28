@@ -23,10 +23,12 @@ public class PlayerMovement : PlayerHandler
     {
         moveSpeed = 10;
         float vertical = Input.GetAxis("Horizontal");
-        float speed = ShouldMove ? vertical * moveSpeed : 0f;
 
-        Vector3 axis = cameraHandler != null ? cameraHandler.MovementAxis : transform.forward;
-        Vector3 movement = axis * speed;
+        if (!ShouldMove || Mathf.Abs(vertical) < 0.01f)
+            return;
+
+        float speed = vertical * moveSpeed;
+        Vector3 movement = transform.forward * speed;
 
         Vector3 currentVelocity = rigidbody.linearVelocity;
         Vector3 targetVelocity = new Vector3(movement.x, currentVelocity.y, movement.z);

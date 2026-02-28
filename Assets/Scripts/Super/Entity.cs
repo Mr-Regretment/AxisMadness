@@ -17,21 +17,51 @@ public abstract class Entity : MonoBehaviour
     {
         health = value;
     }
-    
+
+    private String[] Tags = new string[]
+    {
+        "Floor",
+        "RotatePad",
+        "PhysicsObject",
+        "Button",
+        "TreadMill"
+    };
     public bool IsGrounded()
     {
         if (rigidbody == null)
             return false;
 
         Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
-    
+
         if (!Physics.Raycast(ray, out RaycastHit hitInfo, 2.5f))
             return false;
-    
+
         if (hitInfo.transform == null)
             return false;
 
-        return hitInfo.transform.CompareTag("Floor") || hitInfo.transform.CompareTag("RotatePad") || hitInfo.transform.CompareTag("PhysicsObject") || hitInfo.transform.CompareTag("Button");
+        foreach (string tag in Tags)
+        {
+            if (hitInfo.transform.CompareTag(tag))
+                return true;
+        }
+
+        return false;
+    }
+    
+    public bool IsOnTreadMill()
+    {
+        if (rigidbody == null)
+            return false;
+
+        Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
+
+        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 2.5f))
+            return false;
+
+        if (hitInfo.transform == null)
+            return false;
+        
+        return hitInfo.transform.CompareTag("TreadMill");
     }
 
     protected void Countdown(float secondsWait, System.Action func)

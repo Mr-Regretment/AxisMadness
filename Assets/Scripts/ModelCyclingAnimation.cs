@@ -58,7 +58,7 @@ public class ModelCyclingAnimation : MonoBehaviour
             {
                 SwitchAnimation(3);
             }
-            else if (playerMovement.IsMoving() && CanPlayAnimation(1))
+            else if (playerMovement.IsMoving() && !playerMovement.IsOnTreadMill() && CanPlayAnimation(1))
             {
                 SwitchAnimation(1);
             }

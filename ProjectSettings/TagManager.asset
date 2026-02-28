@@ -11,6 +11,7 @@ TagManager:
   - PhysicsObject
   - FinishLine
   - Button
+  - TreadMill
   layers:
   - Default
   - TransparentFX
