@@ -12,15 +12,18 @@ public class PlayerHandler : Entity
     [SerializeField] private GameObject menu;
     [SerializeField] private GameObject controlTab;
     [SerializeField] private GameObject GUIObject;
+    [SerializeField] private GameObject deathMenu;
     
     private RectTransform menuRect;
     private RectTransform controlTabRect;
     private RectTransform guiObjectRect;
+    private RectTransform deathMenuRect;
     
     private bool ControlTabOpen = false;
     private Vector2 guiObjectEndPosition;
     private Vector2 menuEndPosition;
     private Vector2 controlTabEndPos;
+    private Vector2 deathMenuEndPostion;
 
     protected GameObject NearestObjectOfTag(string tag)
     {
@@ -49,6 +52,8 @@ public class PlayerHandler : Entity
             controlTabRect = controlTab.GetComponent<RectTransform>();
         if(GUIObject != null)
             guiObjectRect = GUIObject.GetComponent<RectTransform>();
+        if(deathMenu != null)
+            deathMenuRect = deathMenu.GetComponent<RectTransform>();
 
         if(guiObjectRect != null)
             guiObjectEndPosition = guiObjectRect.anchoredPosition + (Vector2.down * 250f) + (Vector2.right * 100f);
@@ -56,14 +61,34 @@ public class PlayerHandler : Entity
             controlTabEndPos = controlTabRect.anchoredPosition;
         if(menuRect != null)
             menuEndPosition = menuRect.anchoredPosition;
+
+        if(deathMenuRect != null)
+            deathMenuEndPostion = deathMenuRect.anchoredPosition;
     }
 
-    private void Update()
+    public void RestartScene()
     {
-        
-        if (transform.position.y < -3 && !IsGrounded())
+        Time.timeScale = 1;
+#if UNITY_EDITOR
+        UnityEditor.Selection.activeGameObject = null;
+#endif
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    protected void FreezePlayer()
+    {
+        rigidbody.linearVelocity = Vector3.zero;
+        rigidbody.angularVelocity = Vector3.zero;
+        rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+    }
+
+    protected void Update()
+    {
+        if (transform.position.y < -3 && !IsGrounded() && !isDead)
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            isDead = true;
+            deathMenuEndPostion += Vector2.down * 850f;
+            Invoke(nameof(FreezePlayer), 4f);
         }
 
         if (Input.GetKeyDown(KeyCode.Escape) && !player.GetComponent<PlayerCamera>().StandingOverRotatePad())
@@ -90,6 +115,7 @@ public class PlayerHandler : Entity
         guiObjectRect.anchoredPosition = Vector2.Lerp(guiObjectRect.anchoredPosition, guiObjectEndPosition, Time.unscaledDeltaTime * 2f);
         controlTabRect.anchoredPosition = Vector2.Lerp(controlTabRect.anchoredPosition, controlTabEndPos, Time.unscaledDeltaTime * 2f);
         menuRect.anchoredPosition = Vector2.Lerp(menuRect.anchoredPosition, menuEndPosition, Time.unscaledDeltaTime * 2f);
+        deathMenuRect.anchoredPosition = Vector2.Lerp(deathMenuRect.anchoredPosition, deathMenuEndPostion, Time.unscaledDeltaTime * 5f);
     }
 
     public void Resume()

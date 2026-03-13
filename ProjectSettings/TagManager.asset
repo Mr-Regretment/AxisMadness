@@ -23,8 +23,8 @@ TagManager:
   - VisibleAxis
   - HiddenAxis
   - FadingAxis
-  - 
-  - 
+  - PostProcessing
+  - Player
   - 
   - 
   - 

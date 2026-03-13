@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
@@ -22,14 +23,28 @@ public class UIHandler : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void StartGame()
+    private void OnEnable()
     {
-        HasAcceptedStartGame = true;
-        Camera cam = Camera.main;
-        if (cam != null)
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        HasAcceptedStartGame = false;
+
+        if (scene.buildIndex == 0)
         {
-            Vector3 endPos = cam.transform.position + Vector3.down * 15.5f;
-            CameraTransitionToScene(cam,endPos, targetRotation, 1, 5f, 6f);
+            if (FindFirstObjectByType<MenuInitializer>() == null)
+            {
+                GameObject prefab = Resources.Load<GameObject>("MenuInitializer");
+                if (prefab != null)
+                    Instantiate(prefab);
+            }
         }
     }
 

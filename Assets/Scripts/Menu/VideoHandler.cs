@@ -9,23 +9,28 @@ public class VideoHandler : MonoBehaviour
     [SerializeField] private RawImage videoImage;
     private bool hasVideoStarted = false;
     private bool isStopped = false;
+    private bool hasFadedOut = false;
 
-    public bool IsStopped => isStopped; // Public property for MenuInitializer
+    public bool IsStopped => isStopped;
+    public bool IsStoppedAndFaded => isStopped && hasFadedOut;
 
     void Start()
     {
+        videoPlayer.enabled = true;
         videoPlayer.Play();
     }
 
     void Update()
     {
-        // Once video is playing, mark it as started
-        if (!hasVideoStarted && videoPlayer.isPlaying)
+        if (videoPlayer == null)
         {
-            hasVideoStarted = true;
+            isStopped = true;
+            return;
         }
 
-        // Only fade if: video has started AND now it's stopped AND not already fading
+        if (!hasVideoStarted && videoPlayer.isPlaying)
+            hasVideoStarted = true;
+
         if (hasVideoStarted && !videoPlayer.isPlaying && !isStopped)
         {
             isStopped = true;
@@ -35,8 +40,8 @@ public class VideoHandler : MonoBehaviour
 
     IEnumerator FadeOutVideo(float duration)
     {
-        yield return new WaitForSeconds(0.5f); // Wait before fading
-    
+        yield return new WaitForSeconds(0.5f);
+
         float elapsed = 0f;
         Color color = videoImage.color;
         float startAlpha = color.a;
@@ -51,5 +56,8 @@ public class VideoHandler : MonoBehaviour
 
         color.a = 0f;
         videoImage.color = color;
+
+        
+        hasFadedOut = true;
     }
 }

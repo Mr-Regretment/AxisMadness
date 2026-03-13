@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Reflection;
 
 public class ModelCyclingAnimation : MonoBehaviour
 {
@@ -13,17 +14,26 @@ public class ModelCyclingAnimation : MonoBehaviour
     }
 
     [SerializeField] private List<ModelAnimation> animations = new List<ModelAnimation>();
-    [SerializeField] private PlayerMovement playerMovement;
-    [SerializeField] private CameraHandler cameraHandler;
     [SerializeField] private MonoBehaviour animationController;
     [SerializeField] private string animationControllerMethodName = "";
-    
-    private int currentAnimationIndex = 0;
-    private int currentModelIndex = 0;
-    private float timeSinceLastFrame = 0f;
+
+    public string CurrentAnimationName =>
+        animations.Count > 0 ? animations[_currentAnimationIndex].animationName : string.Empty;
+
+    public int CurrentFrameIndex => _currentModelIndex;
+
+    public System.Action<string, int> OnAnimationFrameChanged;
+
+    private int _currentAnimationIndex = 0;
+    private int _currentModelIndex = 0;
+    private float _timeSinceLastFrame = 0f;
+    private MethodInfo _cachedMethod;
 
     private void Start()
     {
+        if (animationController != null && !string.IsNullOrEmpty(animationControllerMethodName))
+            _cachedMethod = animationController.GetType().GetMethod(animationControllerMethodName);
+
         if (animations.Count > 0)
             UpdateModelDisplay();
     }
@@ -33,76 +43,24 @@ public class ModelCyclingAnimation : MonoBehaviour
         if (animations.Count == 0)
             return;
 
-        if (animationController != null && !string.IsNullOrEmpty(animationControllerMethodName))
+        if (_cachedMethod != null)
         {
-            var method = animationController.GetType().GetMethod(animationControllerMethodName);
-            if (method != null)
-            {
-                object result = method.Invoke(animationController, null);
-                if (result is string animationName)
-                {
-                    SwitchAnimationByName(animationName);
-                }
-            }
-        }
-        else if (playerMovement != null)
-        {
-            if (cameraHandler != null && cameraHandler.IsRotatingAnimation())
-            {
-            }
-            else if (playerMovement.IsJumping() && CanPlayAnimation(0))
-            {
-                SwitchAnimation(0);
-            }
-            else if (playerMovement.IsFalling() && CanPlayAnimation(3))
-            {
-                SwitchAnimation(3);
-            }
-            else if (playerMovement.IsMoving() && !playerMovement.IsOnTreadMill() && CanPlayAnimation(1))
-            {
-                SwitchAnimation(1);
-            }
-            else if (CanPlayAnimation(2))
-            {
-                SwitchAnimation(2);
-            }
+            object result = _cachedMethod.Invoke(animationController, null);
+            if (result is string animationName)
+                SwitchAnimationByName(animationName);
         }
 
-        if (!animations[currentAnimationIndex].isActive)
+        ModelAnimation current = animations[_currentAnimationIndex];
+        if (!current.isActive)
             return;
 
-        float frameDuration = 1f / animations[currentAnimationIndex].speed;
-        timeSinceLastFrame += Time.deltaTime;
-    
-        if (timeSinceLastFrame >= frameDuration)
+        _timeSinceLastFrame += Time.deltaTime;
+        if (_timeSinceLastFrame >= 1f / current.speed)
         {
-            timeSinceLastFrame = 0f;
-            currentModelIndex = (currentModelIndex + 1) % animations[currentAnimationIndex].models.Length;
+            _timeSinceLastFrame = 0f;
+            _currentModelIndex = (_currentModelIndex + 1) % current.models.Length;
             UpdateModelDisplay();
-        }
-    }
-
-    private bool CanPlayAnimation(int index)
-    {
-        if (index < 0 || index >= animations.Count)
-            return false;
-        
-        return animations[index].isActive;
-    }
-
-    private void SwitchAnimation(int index)
-    {
-        index = Mathf.Clamp(index, 0, animations.Count - 1);
-        
-        if (!CanPlayAnimation(index))
-            return;
-        
-        if (index != currentAnimationIndex)
-        {
-            currentAnimationIndex = index;
-            currentModelIndex = 0;
-            timeSinceLastFrame = 0f;
-            UpdateModelDisplay();
+            OnAnimationFrameChanged?.Invoke(current.animationName, _currentModelIndex);
         }
     }
 
@@ -110,9 +68,13 @@ public class ModelCyclingAnimation : MonoBehaviour
     {
         for (int i = 0; i < animations.Count; i++)
         {
-            if (animations[i].animationName == animationName)
+            if (animations[i].animationName == animationName && animations[i].isActive)
             {
-                SwitchAnimation(i);
+                if (i == _currentAnimationIndex) return;
+                _currentAnimationIndex = i;
+                _currentModelIndex = 0;
+                _timeSinceLastFrame = 0f;
+                UpdateModelDisplay();
                 return;
             }
         }
@@ -121,24 +83,10 @@ public class ModelCyclingAnimation : MonoBehaviour
     private void UpdateModelDisplay()
     {
         foreach (ModelAnimation animation in animations)
-        {
             foreach (GameObject model in animation.models)
-            {
-                if (model != null)
-                    SetActiveRecursive(model, false);
-            }
-        }
+                if (model != null) model.SetActive(false);
 
-        if (animations[currentAnimationIndex].models[currentModelIndex] != null)
-        {
-            SetActiveRecursive(animations[currentAnimationIndex].models[currentModelIndex], true);
-        }
-    }
-
-    private void SetActiveRecursive(GameObject obj, bool state)
-    {
-        obj.SetActive(state);
-        foreach (Transform child in obj.transform)
-            SetActiveRecursive(child.gameObject, state);
+        GameObject target = animations[_currentAnimationIndex].models[_currentModelIndex];
+        if (target != null) target.SetActive(true);
     }
 }

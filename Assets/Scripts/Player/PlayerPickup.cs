@@ -16,7 +16,7 @@ namespace Player
         [SerializeField] private float percentage;
         [SerializeField] private Vector3 scale;
 
-        private void Update()
+        private new void Update()
         {
             if (!pickingUp)
             {

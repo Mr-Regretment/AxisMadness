@@ -7,7 +7,8 @@ public abstract class Entity : MonoBehaviour
     [SerializeField] protected new Rigidbody rigidbody;
     [SerializeField] protected GameObject player;
     [SerializeField] protected float jumpForce;
-
+    public bool ExternalForceFromTreadmillActive = false;
+    [System.NonSerialized] public bool isDead = false;
     public int getHealth()
     {
         return health;
@@ -26,6 +27,7 @@ public abstract class Entity : MonoBehaviour
         "Button",
         "TreadMill"
     };
+
     public bool IsGrounded()
     {
         if (rigidbody == null)
@@ -33,7 +35,7 @@ public abstract class Entity : MonoBehaviour
 
         Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
 
-        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 2.5f))
+        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 1.2f, Physics.AllLayers, QueryTriggerInteraction.Collide))
             return false;
 
         if (hitInfo.transform == null)
@@ -55,13 +57,13 @@ public abstract class Entity : MonoBehaviour
 
         Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
 
-        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 2.5f))
+        if (!Physics.Raycast(ray, out RaycastHit hitInfo, 1.2f, Physics.AllLayers, QueryTriggerInteraction.Collide))
             return false;
 
         if (hitInfo.transform == null)
             return false;
         
-        return hitInfo.transform.CompareTag("TreadMill");
+        return hitInfo.transform.CompareTag("TreadMill") && ExternalForceFromTreadmillActive;
     }
 
     protected void Countdown(float secondsWait, System.Action func)

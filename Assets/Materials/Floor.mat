@@ -54,12 +54,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BUILTIN_QueueControl: 0
-    - _BUILTIN_QueueOffset: 0
     - _MaxSideTiles: 1
-    - _SideYOffset: -1.97
+    - _SideYOffset: -1.9
     - _TileScale: 0.5
-    - _TopThreshold: 0.106
+    - _TopThreshold: 0.1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

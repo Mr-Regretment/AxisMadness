@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
@@ -11,29 +11,29 @@ public class Utilities
     public float percentage;
     private Type _type;
 
-    /// <summary>
-    /// Checks if each vector of the first Vector3 is Greater than each vector of the second Vector3.
-    /// Eg: 'transform.localScale > new Vector3(0.5f,0.5f,0.5f)' but it works.
-    /// </summary>
-    /// 
+    
+    
+    
+    
+    
     public static bool IsGreaterThan(Vector3 a, Vector3 b)
     {
         return a.x > b.x && a.y > b.y && a.z > b.z;
     }
     
-    /// <summary>
-    /// Checks if each vector of the first Vector3 is Less than each vector of the second Vector3.
-    /// Eg: "transform.localScale〈 new Vector3(0.5f,0.5f,0.5f) " but it works.
-    /// </summary>
-    /// 
+    
+    
+    
+    
+    
     public static bool IsLessThan(Vector3 a, Vector3 b)
     {
         return a.x < b.x && a.y < b.y && a.z < b.z;
     }
     
-    /// <summary>
-    /// Smoothly lerps a value from start to end over a duration
-    /// </summary>
+    
+    
+    
     public static T SmoothLerp<T>(ref float elapsedTime, T targetValue, T currentValue, float duration)
     {
         elapsedTime += Time.deltaTime;
@@ -45,9 +45,9 @@ public class Utilities
         return LerpValue(currentValue, targetValue, smoothPercentage);
     }
     
-    /// <summary>
-    /// Generic lerp that handles different types
-    /// </summary>
+    
+    
+    
     private static T LerpValue<T>(T from, T to, float t)
     {
         if (typeof(T) == typeof(float))
@@ -90,17 +90,17 @@ public class Utilities
         throw new NotSupportedException($"Type {typeof(T).Name} is not supported for lerping");
     }
 
-    /// <summary>
-    /// Returns true when lerp is complete
-    /// </summary>
+    
+    
+    
     public static bool IsLerpComplete(float percentage)
     {
         return percentage >= 1f;
     }
 
-    /// <summary>
-    /// Resets elapsed time
-    /// </summary>
+    
+    
+    
     public static void ResetLerp(ref float elapsedTime, ref float percentage)
     {
         elapsedTime = 0f;
@@ -123,11 +123,11 @@ public class Utilities
         return value;
 
     }
-    /// <summary>
-    /// Returns a Boolean input parameter to an Integer.
-    /// Eg: IsJumping = true --> BoolIntConversion(IsJumping) - Returns 1;
-    /// Eg: IsJumping = false --> BoolIntConversion(IsJumping) - Returns 0;
-    /// </summary>
+    
+    
+    
+    
+    
     public static int BoolIntConversion(bool boolean)
     {
         return boolean switch

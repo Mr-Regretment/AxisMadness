@@ -45,25 +45,21 @@ Shader "Custom/AutoTile3Textures"
             
             if (abs(normal.y) > _TopThreshold)
             {
-                // Top/Bottom
                 float2 uv = frac(IN.worldPos.xz * _TileScale);
                 col = (normal.y > 0) ? tex2D(_TopTex, uv) : tex2D(_BottomTex, uv);
             }
             else
             {
-                // Sides with max tile limit and Y offset
                 float h = (abs(normal.z) > abs(normal.x)) ? IN.worldPos.x : IN.worldPos.z;
                 float tiledY = (IN.worldPos.y + _SideYOffset) * _TileScale;
                 
                 if (tiledY > _MaxSideTiles)
                 {
-                    // Above max side tiles - use top texture with tiling
                     float2 uv = frac(float2(h * _TileScale, tiledY));
                     col = tex2D(_TopTex, uv);
                 }
                 else
                 {
-                    // Use side texture
                     tiledY = clamp(tiledY, 0, _MaxSideTiles);
                     float2 uv = float2(frac(h * _TileScale), frac(tiledY));
                     col = tex2D(_SideTex, uv);

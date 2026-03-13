@@ -1,31 +1,42 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ObjectCollision : MonoBehaviour
 {
     public bool hasTouchedPlayer = false;
-    [SerializeField] public String[] text;
-    [SerializeField] public float speed;
+
+    [SerializeField] private CameraHandler cameraHandler;
+
+    private bool _activated = false;
+
+    private void Awake()
+    {
+        if (cameraHandler == null)
+            cameraHandler = FindFirstObjectByType<CameraHandler>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (_activated) return;
+        if (!other.CompareTag("Player")) return;
+
+        _activated = true;
+        hasTouchedPlayer = true;
+
+        if (cameraHandler != null)
         {
-            hasTouchedPlayer = true;
-            CameraHandler cameraHandler = FindFirstObjectByType<CameraHandler>();
-            cameraHandler.RelocateCameraToPlayer();
-            Invoke(nameof(Destroy), 2.5f);
+            cameraHandler.FocusOnPlayer();
         }
+
+        Invoke(nameof(DestroySelf), 2.5f);
     }
 
     public bool HasBeenActivated()
     {
-        return hasTouchedPlayer;
+        return _activated;
     }
 
-    void Destroy()
+    private void DestroySelf()
     {
         Destroy(gameObject);
     }
-    
 }

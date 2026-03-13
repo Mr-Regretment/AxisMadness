@@ -61,7 +61,7 @@ Shader "Custom/AutoTile3TexturesDoor"
             {
                 col = tex2D(_BottomTex, fractUV);
             }
-            else // Sides and slopes
+            else
             {
                 if (localPos.y < _SideBottomThreshold)
                 {

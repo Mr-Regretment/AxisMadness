@@ -29,8 +29,11 @@ public class MenuInitializer : MonoBehaviour
     void Update()
     {
         if (_videoHandler == null)
+        {
             return;
-        
+        }
+
+
         if (_videoHandler.IsStopped && !animationStarted)
         {
             animationStarted = true;

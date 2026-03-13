@@ -1,70 +1,73 @@
-using System;
-using System.Collections;
 using UnityEngine;
+using System.Collections;
 
 public class CameraHandler : MonoBehaviour
 {
-    #region Variables
-    [SerializeField] private float rotationSpeed = 5f;
     [SerializeField] private GameObject player;
-    [SerializeField] public Quaternion targetCameraRotation;
+    [SerializeField] private float rotationSpeed = 5f;
+    [SerializeField] PlayerHandler _playerHandler;
+
+    private PlayerMovement _playerMovement;
+    private PlayerCamera _playerCamera;
+    private Rigidbody _playerRigidbody;
+    private CharacterOffScreen _characterOffScreen;
+
+    public Quaternion targetCameraRotation;
     private Quaternion targetPlayerRotation;
     public Vector3 targetPosition;
-    [SerializeField] private bool isRotating = false;
-    private Vector3 _targetRoundedPos;
-    private bool initialMoveDone = false;
+
+    private bool _onRotatePad = false;
+    private bool isRotating = false;
+
+    private bool _isRepositioning = false;
     private bool automaticCameraReposition = true;
+    private bool initialMoveDone = false;
+    private float _cameraMoveLockTimer = 0f;
+
+    public bool OverrideShouldMove { get; set; } = false;
+
+    public System.Action OnCameraFocus;
 
     private const float CAMERA_Y_OFFSET = 7.5f;
 
+    private RigidbodyConstraints _preRotateConstraints;
+    
     private Quaternion _confirmedCameraRotation;
     private Quaternion _confirmedPlayerRotation;
     private Quaternion _previewCameraRotation;
     private Quaternion _previewPlayerRotation;
-    private bool _onRotatePad = false;
-    private bool _snapComplete = false;
 
-    private Rigidbody _playerRigidbody;
-    private PlayerMovement _playerMovement;
-    private PlayerCamera _playerCamera;
-    private CharacterOffScreen _characterOffScreen;
-
-    public bool HasUnconfirmedRotation => _onRotatePad && (_previewCameraRotation != _confirmedCameraRotation);
-    private bool _isRepositioning = false;
-    private bool _rotationConfirmed = false;
-
-    [SerializeField] private GlitchEffect glitchEffect;
-    #endregion
+    private bool _pendingMovementRestore = false;
 
     void Start()
     {
-        _playerRigidbody = player.GetComponent<Rigidbody>();
         _playerMovement = player.GetComponent<PlayerMovement>();
         _playerCamera = player.GetComponent<PlayerCamera>();
+        _playerRigidbody = player.GetComponent<Rigidbody>();
         _characterOffScreen = player.GetComponent<CharacterOffScreen>();
+        
+        if(_playerHandler == null)
+            _playerHandler = player.GetComponent<PlayerHandler>();
 
-        _targetRoundedPos = player.transform.position;
         targetCameraRotation = transform.rotation;
         targetPlayerRotation = player.transform.rotation;
-        _confirmedCameraRotation = transform.rotation;
-        _confirmedPlayerRotation = player.transform.rotation;
         targetPosition = transform.position + Vector3.down * CAMERA_Y_OFFSET;
-    }
-    public Vector3 MovementAxis
-    {
-        get
-        {
-            Vector3 forward = _confirmedPlayerRotation * Vector3.forward;
-            forward.y = 0f;
-            return forward.normalized;
-        }
-    }
-    
-    private void Rotation()
-    {
-        if (isRotating)
-            return;
 
+        _confirmedCameraRotation = targetCameraRotation;
+        _confirmedPlayerRotation = targetPlayerRotation;
+        _previewCameraRotation = targetCameraRotation;
+        _previewPlayerRotation = targetPlayerRotation;
+    }
+
+    void Update()
+    {
+        HandleRotation();
+        HandleReposition();
+        ApplyTransforms();
+    }
+
+    private void HandleRotation()
+    {
         if (_playerCamera == null)
             return;
 
@@ -73,55 +76,73 @@ public class CameraHandler : MonoBehaviour
         if (onPad && !_onRotatePad)
         {
             _onRotatePad = true;
-            _snapComplete = false;
-            if (!OverrideShouldMove)
-                _playerMovement.ShouldMove = false;
+            _playerMovement.ShouldMoveHorizontal = false;
+
+            Vector3 vel = _playerRigidbody.linearVelocity;
+            if (Mathf.Abs(vel.x) > Mathf.Abs(vel.z))
+                _preRotateConstraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+            else
+                _preRotateConstraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotation;
 
             _confirmedCameraRotation = targetCameraRotation;
             _confirmedPlayerRotation = targetPlayerRotation;
             _previewCameraRotation = targetCameraRotation;
             _previewPlayerRotation = targetPlayerRotation;
 
-            float x = Mathf.Round(player.transform.position.x);
-            float z = Mathf.Round(player.transform.position.z);
-            float padTopY = _playerCamera.CurrentRotatePad().GetComponent<Collider>().bounds.max.y;
-            StartCoroutine(SnapPlayerToPad(new Vector3(x, padTopY, z), () => _snapComplete = true));
+            Collider padCollider = _playerCamera.CurrentRotatePad().GetComponent<Collider>();
+            float padTopY = padCollider.bounds.max.y;
+            float playerHalfHeight = player.GetComponent<Collider>().bounds.extents.y;
+
+            Vector3 padCenter = padCollider.bounds.center;
+            StartCoroutine(SmoothSnapToPad(new Vector3(padCenter.x, padTopY + playerHalfHeight, padCenter.z)));
         }
 
         if (!onPad && _onRotatePad)
         {
             _onRotatePad = false;
-            _snapComplete = false;
-            _rotationConfirmed = false;
+            _playerMovement.ShouldMoveHorizontal = true;
+            _pendingMovementRestore = false;
+
             targetCameraRotation = _confirmedCameraRotation;
             targetPlayerRotation = _confirmedPlayerRotation;
-            if (!OverrideShouldMove)
-                _playerMovement.ShouldMove = true;
-            return;
+            StartCoroutine(LockAxisDuringReset());
         }
 
-        if (!onPad || !_snapComplete)
+        if (Input.GetKeyDown(KeyCode.R))
+            FocusOnPlayer();
+        
+        if (!_onRotatePad)
             return;
 
-        if (!_rotationConfirmed && !OverrideShouldMove)
-            _playerMovement.ShouldMove = false;
+        if (_playerCamera.tokenCount <= 0)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            _previewCameraRotation *= Quaternion.Euler(0, 90f, 0);
+            _previewPlayerRotation *= Quaternion.Euler(0, 90f, 0);
+            targetCameraRotation = _previewCameraRotation;
+            targetPlayerRotation = _previewPlayerRotation;
+            StartRotation();
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            _previewCameraRotation *= Quaternion.Euler(0, -90f, 0);
+            _previewPlayerRotation *= Quaternion.Euler(0, -90f, 0);
+            targetCameraRotation = _previewCameraRotation;
+            targetPlayerRotation = _previewPlayerRotation;
+            StartRotation();
+        }
 
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            if (_playerCamera.tokenCount > 0)
-            {
-                _playerCamera.tokenCount--;
-                isRotating = true;
-                _snapComplete = false;
-                _rotationConfirmed = true;
-                _confirmedCameraRotation = _previewCameraRotation;
-                _confirmedPlayerRotation = _previewPlayerRotation;
-                targetPosition = player.transform.position;
-                glitchEffect?.TriggerGlitch();
-                if (!OverrideShouldMove)
-                    _playerMovement.ShouldMove = true;
-            }
-            return;
+            _playerCamera.tokenCount--;
+            CameraMove(player.transform.position, false);
+            _confirmedCameraRotation = _previewCameraRotation;
+            _confirmedPlayerRotation = _previewPlayerRotation;
+            _pendingMovementRestore = true;
+            StartRotation();
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -130,143 +151,155 @@ public class CameraHandler : MonoBehaviour
             _previewPlayerRotation = _confirmedPlayerRotation;
             targetCameraRotation = _confirmedCameraRotation;
             targetPlayerRotation = _confirmedPlayerRotation;
-            glitchEffect?.TriggerGlitch();
-            return;
+            StartRotation();
         }
 
-        if (!_playerCamera.StandingOverRotatePad() || _playerCamera.tokenCount <= 0)
-            return;
-
-        if (Input.GetKeyDown(KeyCode.Q) && !Input.GetKeyDown(KeyCode.E))
+        if (isRotating)
         {
-            _previewCameraRotation *= Quaternion.Euler(0, 90f, 0);
-            _previewPlayerRotation *= Quaternion.Euler(0, 90f, 0);
-            targetCameraRotation = _previewCameraRotation;
-            targetPlayerRotation = _previewPlayerRotation;
-            glitchEffect?.TriggerGlitch();
-            
-        }
+            float camDiff = Quaternion.Angle(transform.rotation, targetCameraRotation);
+            float playerDiff = Quaternion.Angle(player.transform.rotation, targetPlayerRotation);
 
-        if (Input.GetKeyDown(KeyCode.E) && !Input.GetKeyDown(KeyCode.Q))
-        {
-            _previewCameraRotation *= Quaternion.Euler(0, -90f, 0);
-            _previewPlayerRotation *= Quaternion.Euler(0, -90f, 0);
-            targetCameraRotation = _previewCameraRotation;
-            targetPlayerRotation = _previewPlayerRotation;
-            glitchEffect?.TriggerGlitch();
+            if (camDiff < 1f && playerDiff < 1f)
+            {
+                isRotating = false;
+                if (_pendingMovementRestore)
+                {
+                    _pendingMovementRestore = false;
+                    _playerMovement.ShouldMoveHorizontal = true;
+                }
+            }
         }
     }
+    
+    private IEnumerator LockAxisDuringReset()
+    {
+        _playerRigidbody.constraints = _preRotateConstraints;
 
-    private IEnumerator SnapPlayerToPad(Vector3 snapTarget, System.Action onComplete)
+        yield return new WaitUntil(() =>
+            Quaternion.Angle(transform.rotation, targetCameraRotation) < 1f &&
+            Quaternion.Angle(player.transform.rotation, targetPlayerRotation) < 1f
+        );
+
+        _playerRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+    }
+    
+    private IEnumerator SmoothSnapToPad(Vector3 target)
     {
         _playerRigidbody.linearVelocity = Vector3.zero;
         _playerRigidbody.isKinematic = true;
-        player.transform.position = snapTarget;
 
-        while (Vector3.Distance(player.transform.position, snapTarget) > 0.01f)
+        while (Vector3.Distance(player.transform.position, target) > 0.01f)
         {
             player.transform.position = Vector3.Lerp(
                 player.transform.position,
-                snapTarget,
+                target,
                 Time.deltaTime * 12f
             );
             yield return null;
         }
 
-        player.transform.position = snapTarget;
+        player.transform.position = target;
         _playerRigidbody.isKinematic = false;
-        onComplete?.Invoke();
     }
 
-    void Update()
+    public bool IsRotatingAnimation()
     {
-        bool isTransitioning = (UIHandler.Instance != null && UIHandler.Instance.IsTransitioning);
+        return isRotating;
+    }
 
-        if (isTransitioning)
-            return;
+    private void StartRotation()
+    {
+        isRotating = true;
+        OnCameraFocus?.Invoke();
+    }
 
+    private void HandleReposition()
+    {
         if (!initialMoveDone && Vector3.Distance(transform.position, targetPosition) < 0.5f)
             initialMoveDone = true;
 
-        if (_characterOffScreen.isOffscreen && automaticCameraReposition && initialMoveDone)
+        if (_playerHandler.isDead)
+            return;
+
+        if (_cameraMoveLockTimer > 0f)
         {
-            Vector3 newTarget = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
+            _cameraMoveLockTimer -= Time.deltaTime;
+            return;
+        }
+
+        if (_characterOffScreen != null &&
+            _characterOffScreen.isOffscreen &&
+            automaticCameraReposition &&
+            initialMoveDone)
+        {
+            Vector3 newTarget = new Vector3(
+                player.transform.position.x,
+                transform.position.y,
+                player.transform.position.z
+            );
 
             if (Vector3.Distance(transform.position, newTarget) > 1f && !_isRepositioning)
-            {
                 _isRepositioning = true;
-            }
 
             targetPosition = newTarget;
         }
 
         if (_isRepositioning)
         {
-            bool isAirborne = Mathf.Abs(_playerRigidbody.linearVelocity.y) > 0.1f;
-
-            if (Vector3.Distance(transform.position, targetPosition) < 1f || isAirborne)
-            {
+            if (Vector3.Distance(transform.position, targetPosition) < 1f)
                 _isRepositioning = false;
-            }
         }
 
         if (initialMoveDone && automaticCameraReposition)
         {
-            float yPos = Mathf.Lerp(transform.position.y, player.transform.position.y, Time.deltaTime * 25f);
-            transform.position = new Vector3(transform.position.x, yPos, transform.position.z);
+            float y = Mathf.Lerp(transform.position.y, player.transform.position.y, Time.deltaTime * 25f);
+            transform.position = new Vector3(transform.position.x, y, transform.position.z);
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.R))
-            targetPosition = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
+    public void FocusOnPlayer(float lockDuration = 0.75f)
+    {
+        if (player == null) return;
 
-        if (isRotating)
+        CameraMove(new Vector3(
+            player.transform.position.x,
+            transform.position.y,
+            player.transform.position.z
+        ), false,lockDuration);
+
+        OnCameraFocus?.Invoke();
+    }
+
+    private IEnumerator LockMovementRoutine(float duration)
+    {
+        if (_playerMovement != null)
         {
-            if (!OverrideShouldMove)
-                _playerMovement.ShouldMove = false;
-
-            float cameraDiff = Quaternion.Angle(transform.rotation, targetCameraRotation);
-            float playerDiff = Quaternion.Angle(player.transform.rotation, targetPlayerRotation);
-
-            if (cameraDiff < 1f && playerDiff < 1f)
-            {
-                isRotating = false;
-                if (!OverrideShouldMove)
-                    _playerMovement.ShouldMove = true;
-            }
+            _playerMovement.SetMovementEnabled(false);
+            yield return new WaitForSeconds(duration);
+            _playerMovement.SetMovementEnabled(true);
         }
+    }
 
-        Rotation();
+    private void ApplyTransforms()
+    {
         transform.rotation = Quaternion.Slerp(transform.rotation, targetCameraRotation, Time.deltaTime * 5f);
         player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetPlayerRotation, Time.deltaTime * rotationSpeed);
-        transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime * 4f);
+        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * 4f);
     }
 
-    public void RelocateCameraToPlayer()
+    public void CameraMove(Vector3 tarPos,bool locksMovement,float lockDuration = 2f)
     {
-        targetPosition = new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z);
+        targetPosition = tarPos;
+        _cameraMoveLockTimer = lockDuration;
+        if(locksMovement)
+            StartCoroutine(LockMovementRoutine(lockDuration));
     }
 
-    public IEnumerator CameraMove(Vector3 newPosition, float duration, float delay)
+    public void SetPlayerMovement(bool enabled)
     {
-        yield return new WaitForSeconds(delay);
-        automaticCameraReposition = false;
+        OverrideShouldMove = !enabled;
 
-        Vector3 startPosition = transform.position;
-        targetPosition = newPosition;
-
-        yield return new WaitUntil(() => Vector3.Distance(transform.position, targetPosition) < 2f);
-        yield return new WaitForSeconds(duration);
-
-        targetPosition = startPosition;
-
-        yield return new WaitUntil(() => Vector3.Distance(transform.position, targetPosition) < 2f);
-        automaticCameraReposition = true;
-    }
-
-    public bool OverrideShouldMove { get; set; } = false;
-
-    public bool IsRotatingAnimation()
-    {
-        return isRotating;
+        if (_playerMovement != null)
+            _playerMovement.SetMovementEnabled(enabled);
     }
 }

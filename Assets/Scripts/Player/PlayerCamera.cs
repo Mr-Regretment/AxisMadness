@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -43,24 +43,28 @@ public class PlayerCamera : PlayerHandler
     }
 
     private float targetAlpha = 0f;
-    private void Update()
+
+    private new void Update()
     {
         if (acceptNewRotationText != null && StandingOverRotatePad())
         {
-            if (cameraHandler.HasUnconfirmedRotation)
-                acceptedCameraRotationTargetPos = acceptedCameraRotationStartingPos + (Vector3.down * 65);
-            else
-                acceptedCameraRotationTargetPos = acceptedCameraRotationStartingPos;
+            
+            acceptedCameraRotationTargetPos = acceptedCameraRotationStartingPos + (Vector3.down * 65);
         }
         else
         {
             acceptedCameraRotationTargetPos = acceptedCameraRotationStartingPos;
         }
 
-        acceptNewRotationText.transform.position = Vector3.Lerp(acceptNewRotationText.transform.position,acceptedCameraRotationTargetPos, Time.deltaTime * 8f);
+        acceptNewRotationText.transform.position = Vector3.Lerp(
+            acceptNewRotationText.transform.position,
+            acceptedCameraRotationTargetPos,
+            Time.deltaTime * 8f
+        );
         
         TextMeshProUGUI tokenCountGui = guiTokenCount.GetComponent<TextMeshProUGUI>();
         tokenCountGui.text = tokenCount.ToString();
+
         Color leftImageColour = leftImage.color;
         Color rightImageColor = rightImage.color;
         Color leftTextColour = leftText.color;
@@ -69,8 +73,8 @@ public class PlayerCamera : PlayerHandler
         targetAlpha = Input.GetKey(KeyCode.LeftShift) && StandingOverRotatePad() ? 1 : 0;
             
         leftImageColour.a = Mathf.Lerp(leftImageColour.a, targetAlpha, Time.deltaTime * 10f);
-        rightImageColor.a = Mathf.Lerp(rightTextColour.a, targetAlpha, Time.deltaTime * 10f);
-        leftTextColour.a = Mathf.Lerp(leftImageColour.a, targetAlpha, Time.deltaTime * 10f);
+        rightImageColor.a = Mathf.Lerp(rightImageColor.a, targetAlpha, Time.deltaTime * 10f);
+        leftTextColour.a = Mathf.Lerp(leftTextColour.a, targetAlpha, Time.deltaTime * 10f);
         rightTextColour.a = Mathf.Lerp(rightTextColour.a, targetAlpha, Time.deltaTime * 10f);
         
         leftImage.color = leftImageColour;   
