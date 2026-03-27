@@ -50,11 +50,7 @@ public class BGM : MonoBehaviour
             if (_debugLogTimer >= _debugLogInterval)
             {
                 _debugLogTimer = 0f;
-                Debug.Log($"[BGM] Loop progress: {percentage:F1}%");
             }
-
-            if (current < _lastPlaybackPosition)
-                Debug.Log("[BGM] Loop point hit — restarting loop");
 
             _lastPlaybackPosition = current;
         }

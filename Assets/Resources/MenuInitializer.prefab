@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7485110174541679405}
   - component: {fileID: 6074816522384415307}
   - component: {fileID: 1747935281264392358}
-  - component: {fileID: 4531636106286135634}
   m_Layer: 0
   m_Name: MenuInitializer
   m_TagString: Untagged
@@ -51,7 +50,7 @@ MonoBehaviour:
   StartButton: {fileID: 0}
   QuitButton: {fileID: 0}
   BackgroundPanel: {fileID: 0}
-  uiHandler: {fileID: 4531636106286135634}
+  uiHandler: {fileID: 0}
   QuitFloat: 260
   StartFloat: 260
   StartFloatY: 375
@@ -91,17 +90,3 @@ VideoPlayer:
   m_WaitForFirstFrame: 1
   m_FrameReadyEventEnabled: 0
   m_VideoShaders: []
---- !u!114 &4531636106286135634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3375174125637510836}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e2e372d3b7945e393264acfebb5b08b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIHandler
-  targetRotation: {x: 0.25762746, y: 0.09257989, z: -0.024806703, w: 0.9614789}
-  HasAcceptedStartGame: 0
